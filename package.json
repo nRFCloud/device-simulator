@@ -29,8 +29,6 @@
     "@types/aws-iot-device-sdk": "^2.1.0",
     "@types/jest": "^21.1.2",
     "@types/node": "^8.0.34",
-    "aws-iot-device-sdk": "^2.1.0",
-    "aws-sdk": "^2.131.0",
     "jest": "^21.2.1",
     "json-schema-to-typescript": "^4.6.5",
     "pem": "^1.12.0",
@@ -39,6 +37,8 @@
     "typescript": "2.3.4"
   },
   "dependencies": {
+    "aws-iot-device-sdk": "^2.1.0",
+    "aws-sdk": "^2.131.0",
     "colors": "^1.1.2",
     "commander": "^2.11.0",
     "dotenv": "^4.0.0",
