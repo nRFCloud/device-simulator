@@ -13,7 +13,6 @@
     "lint": "tslint --project ./tsconfig.json",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "postinstall": "npm run build",
     "schemas2ts": "./node_modules/json-schema-to-typescript/dist/src/cli.js schemas/nordicsemi/gpsflip.schema.json src/firmware/nordicsemi/GpsFlipModel.ts"
   },
   "repository": {
