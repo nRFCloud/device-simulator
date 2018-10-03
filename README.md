@@ -4,9 +4,9 @@ Command line utility for simulating a device connecting to and pairing with [nRF
 
 ### Install
 
-This utility can be ran without running npm install.  
+This utility cannot be run without installing at least the production dependencies:
 
-    npm i
+    npm ci --only=prod
 
 ### Device configuration
 To create a device configuration use [nrfcloud-cli](https://github.com/NordicPlayground/nrfcloud-cli).
