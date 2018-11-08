@@ -38,7 +38,6 @@ class FakeHostConnection extends events_1.EventEmitter {
             if (this.onUpdateShadow) {
                 yield this.onUpdateShadow(reported);
             }
-            this.reported = reported;
         });
     }
     sendMessage(message) {
@@ -49,9 +48,8 @@ class FakeHostConnection extends events_1.EventEmitter {
             return;
         });
     }
-    setTopics(c2d, d2c) {
+    setTopics(_c2d, d2c) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.c2d = c2d;
             this.d2c = d2c;
         });
     }

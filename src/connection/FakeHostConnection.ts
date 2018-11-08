@@ -8,13 +8,10 @@ export type OnUpdateShadow = (updateShadow: ShadowModelReported) => Promise<void
 export type OnSendMessage = (topic: string, message: string) => Promise<void>;
 
 export class FakeHostConnection extends EventEmitter implements IHostConnection {
-    private reported: ShadowModelReported;
-
     private onUpdateShadow: OnUpdateShadow;
     private onSendMessage: OnSendMessage;
 
     private d2c: string;
-    private c2d: string;
 
     constructor(onUpdateShadow?: OnUpdateShadow,
                 onSendMessage?: OnSendMessage) {
@@ -50,8 +47,6 @@ export class FakeHostConnection extends EventEmitter implements IHostConnection 
         if (this.onUpdateShadow) {
             await this.onUpdateShadow(reported);
         }
-
-        this.reported = reported;
     }
 
     async sendMessage(message: string): Promise<void> {
@@ -62,8 +57,7 @@ export class FakeHostConnection extends EventEmitter implements IHostConnection 
         return;
     }
 
-    async setTopics(c2d: string, d2c: string): Promise<void> {
-        this.c2d = c2d;
+    async setTopics(_c2d: string, d2c: string): Promise<void> {
         this.d2c = d2c;
     }
 }
