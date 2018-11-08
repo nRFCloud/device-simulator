@@ -1,11 +1,10 @@
 import { EventEmitter } from 'events';
+import logger from '../logger';
 import { HostConnectionError, IHostConnection } from './HostConnection';
 import { ConfigurationData } from '../ConfigurationStorage';
 import { ShadowModel, ShadowModelDesired, ShadowModelReported } from '../ShadowModel';
 
 import * as awsIot from 'aws-iot-device-sdk';
-
-let logger = require('winston');
 
 export class AWSIoTHostConnection extends EventEmitter implements IHostConnection {
     private config: ConfigurationData;
@@ -14,14 +13,10 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
     private c2d: string;
     private deltaEnabled: boolean;
 
-    constructor(config: ConfigurationData, newLogger?: any) {
+    constructor(config: ConfigurationData) {
         super();
 
         this.config = config;
-
-        if (newLogger) {
-            logger = newLogger;
-        }
 
         this.deltaEnabled = false;
     }

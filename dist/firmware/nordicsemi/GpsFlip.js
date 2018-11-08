@@ -8,19 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const logger_1 = require("../../logger");
 const Firmware_1 = require("../Firmware");
 const App_1 = require("./App/App");
-let logger = require('winston');
 class GpsFlip {
-    constructor(pairingEngine, hostConnection, sensors, newLogger) {
+    constructor(pairingEngine, hostConnection, sensors) {
         this.apps = [];
         this.sendMessage = (timestamp, message) => {
             const timeStamp = new Date(timestamp).toISOString();
-            logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
-            logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
+            logger_1.default.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
+            logger_1.default.debug(`messageId not sent in message since firmware implementation does not have it.`);
             this.state.messages.sent++;
             this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
-                logger.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
+                logger_1.default.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
             });
         };
         this.pairingEngine = pairingEngine;
@@ -34,9 +34,6 @@ class GpsFlip {
             },
         };
         this.sensors = sensors;
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
     startApplication(pairing) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -47,10 +44,10 @@ class GpsFlip {
                         yield app.start();
                     }
                     this.applicationStarted = true;
-                    logger.info(`Pairing done, application started.`);
+                    logger_1.default.info(`Pairing done, application started.`);
                 }
                 else {
-                    logger.warn('Paired but application topics are NOT provided by nRF Cloud.');
+                    logger_1.default.warn('Paired but application topics are NOT provided by nRF Cloud.');
                 }
             }
         });
@@ -67,7 +64,7 @@ class GpsFlip {
     }
     setupPairing() {
         this.pairingEngine.on('pairingUpdate', (state, status) => {
-            logger.debug(`gpsFlip; updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
+            logger_1.default.debug(`gpsFlip; updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
             this.hostConnection.updateShadow({
                 pairing: state === null ? undefined : state,
                 pairingStatus: status,
@@ -91,7 +88,7 @@ class GpsFlip {
             }
             else {
                 // Some application specific state is desired, reply back as reported and process afterwards
-                logger.debug(`shadow; json data not related to pairing: ${JSON.stringify(delta)}`);
+                logger_1.default.debug(`shadow; json data not related to pairing: ${JSON.stringify(delta)}`);
                 yield this.hostConnection.updateShadow(delta);
             }
         }));
@@ -103,18 +100,18 @@ class GpsFlip {
             }
             this.setupPairing();
             this.hostConnection.on('reconnect', () => {
-                logger.info('Reconnecting to nRF Cloud.');
+                logger_1.default.info('Reconnecting to nRF Cloud.');
             });
             this.hostConnection.on('connect', () => {
-                logger.info('Connected to nRF Cloud.');
+                logger_1.default.info('Connected to nRF Cloud.');
             });
             this.hostConnection.on('disconnect', () => {
-                logger.info('Disconnected from nRF Cloud.');
+                logger_1.default.info('Disconnected from nRF Cloud.');
             });
             this.apps = Array.from(this.sensors.entries()).map(([name, sensor]) => App_1.createApp(name, sensor, this.sendMessage));
             this.hostConnection.on('message', (message) => {
                 const demopackMessage = Object.assign({}, message);
-                logger.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
+                logger_1.default.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
             });
             yield this.hostConnection.connect();
             return new Promise(() => {

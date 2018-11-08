@@ -1,4 +1,4 @@
-let winston = require('winston');
+const winston = require('winston');
 
 const transports = [
     new winston.transports.Console({

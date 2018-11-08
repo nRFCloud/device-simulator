@@ -1,3 +1,4 @@
+import logger from '../../logger';
 import { FirmwareError, FirmwareState, IFirmware, MessageStatus } from '../Firmware';
 import { IPairingEngine } from '../../pairing/PairingEngine';
 import { IHostConnection } from '../../connection/HostConnection';
@@ -6,8 +7,6 @@ import { ISensor } from '../../sensors/Sensor';
 import { DemopackMessage } from './GpsFlipModel';
 import { Pairing } from '../../pairing/Pairing';
 import { App, createApp } from './App/App';
-
-let logger = require('winston');
 
 //
 // Simulate behaviour of Alta device:
@@ -27,8 +26,7 @@ export class GpsFlip implements IFirmware {
     constructor(
         pairingEngine: IPairingEngine,
         hostConnection: IHostConnection,
-        sensors: Map<string, ISensor>,
-        newLogger?: any) {
+        sensors: Map<string, ISensor>) {
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.state = <FirmwareState>{
@@ -40,10 +38,6 @@ export class GpsFlip implements IFirmware {
             },
         };
         this.sensors = sensors;
-
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
 
     private sendMessage: SendMessage = (timestamp, message) => {

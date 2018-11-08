@@ -11,7 +11,7 @@ export declare class PairingEngine extends EventEmitter implements IPairingEngin
     readonly pairingMethods: Array<IPairingMethod>;
     private previousPairing;
     private selectedPairingMethod;
-    constructor(pairingMethods: Array<IPairingMethod>, newLogger?: any);
+    constructor(pairingMethods: Array<IPairingMethod>);
     private cancelRetrievePattern();
     private stateWaitingForPattern(state);
     private stateFactory(pairing);

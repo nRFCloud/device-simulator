@@ -15,7 +15,6 @@ import { AWSIoTHostConnection } from './connection/AWSIoTHostConnection';
 import { SwitchesMethod } from './pairing/methods/ButtonsMethod';
 import { FakeAccelerometer } from './sensors/FakeAccelerometer';
 import FakeThermometer from './sensors/FakeThermometer';
-import logger from './logger';
 
 let ran = false;
 
@@ -44,7 +43,7 @@ async function startSimulation(configFilename: string, firmwareNsrn: string, opt
 
     const pairingEngine = new PairingEngine(pairingMethods);
 
-    const hostConnection = new AWSIoTHostConnection(config, logger);
+    const hostConnection = new AWSIoTHostConnection(config);
 
     const sensors: Map<string, ISensor> = new Map<string, ISensor>();
 
@@ -63,9 +62,7 @@ async function startSimulation(configFilename: string, firmwareNsrn: string, opt
     const firmwareDirectory = new FirmwareDirectory(
         pairingEngine,
         hostConnection,
-        sensors,
-        logger
-    );
+        sensors);
 
     firmwareDirectory.create();
 

@@ -9,7 +9,7 @@ export declare class AWSIoTHostConnection extends EventEmitter implements IHostC
     private d2c;
     private c2d;
     private deltaEnabled;
-    constructor(config: ConfigurationData, newLogger?: any);
+    constructor(config: ConfigurationData);
     private getShadowBaseTopic();
     updateShadow(reported: ShadowModelReported): Promise<void>;
     connect(): Promise<void>;

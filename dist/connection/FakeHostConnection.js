@@ -9,15 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
-let logger = require('winston');
+const logger_1 = require("../logger");
 class FakeHostConnection extends events_1.EventEmitter {
-    constructor(onUpdateShadow, onSendMessage, newLogger) {
+    constructor(onUpdateShadow, onSendMessage) {
         super();
         this.onUpdateShadow = onUpdateShadow;
         this.onSendMessage = onSendMessage;
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
     connect() {
         this.emit('connect');
@@ -37,7 +34,7 @@ class FakeHostConnection extends events_1.EventEmitter {
     }
     updateShadow(reported) {
         return __awaiter(this, void 0, void 0, function* () {
-            logger.debug(`Fake: Updating shadow.reported on host '${JSON.stringify(reported)}'`);
+            logger_1.default.debug(`Fake: Updating shadow.reported on host '${JSON.stringify(reported)}'`);
             if (this.onUpdateShadow) {
                 yield this.onUpdateShadow(reported);
             }

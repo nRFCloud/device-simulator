@@ -11,7 +11,7 @@ export declare class GpsFlip implements IFirmware {
     private applicationStarted;
     private sensors;
     private apps;
-    constructor(pairingEngine: IPairingEngine, hostConnection: IHostConnection, sensors: Map<string, ISensor>, newLogger?: any);
+    constructor(pairingEngine: IPairingEngine, hostConnection: IHostConnection, sensors: Map<string, ISensor>);
     private sendMessage;
     private startApplication(pairing);
     private stopApplication();

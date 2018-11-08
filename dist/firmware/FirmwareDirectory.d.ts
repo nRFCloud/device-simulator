@@ -7,7 +7,7 @@ export declare class FirmwareDirectory {
     private pairingEngine;
     private hostConnection;
     private sensors;
-    constructor(pairingEngine: IPairingEngine, hostConnection: IHostConnection, sensors: Map<string, ISensor>, newLogger?: any);
+    constructor(pairingEngine: IPairingEngine, hostConnection: IHostConnection, sensors: Map<string, ISensor>);
     create(): void;
     getFirmwareList(): Array<string>;
     getFirmware(firmware: string): IFirmware;

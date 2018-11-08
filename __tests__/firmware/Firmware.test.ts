@@ -10,7 +10,6 @@ import { ShadowModelReported } from '../../src/ShadowModel';
 import { SwitchesMethod } from '../../src/pairing/methods/ButtonsMethod';
 import { FakeAccelerometer } from '../../src/sensors/FakeAccelerometer';
 
-let logger = require('winston');
 let firmwareDirectory: FirmwareDirectory;
 
 const nmeaRecording = '__tests__/sensors/nmea-recording.txt';
@@ -33,8 +32,7 @@ describe('firmware directory', () => {
 
         const hostConnection: IHostConnection = new FakeHostConnection(
             onUpdateShadow,
-            onSendMessage,
-            logger);
+            onSendMessage);
 
         const sensors: Map<string, ISensor> = new Map<string, ISensor>();
         sensors.set('gps', new FakeGps(nmeaRecording, ['GPGGA']));
@@ -43,9 +41,7 @@ describe('firmware directory', () => {
         firmwareDirectory = new FirmwareDirectory(
             pairingEngine,
             hostConnection,
-            sensors,
-            logger
-        );
+            sensors);
 
         firmwareDirectory.create();
     });

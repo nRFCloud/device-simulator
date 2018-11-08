@@ -2,8 +2,7 @@ import { IHostConnection } from './HostConnection';
 import { ShadowModelReported, ShadowModelDesired } from '../ShadowModel';
 import { EventEmitter } from 'events';
 import { Pairing } from '../pairing/Pairing';
-
-let logger = require('winston');
+import logger from '../logger';
 
 export type OnUpdateShadow = (updateShadow: ShadowModelReported) => Promise<void>;
 export type OnSendMessage = (topic: string, message: string) => Promise<void>;
@@ -18,14 +17,10 @@ export class FakeHostConnection extends EventEmitter implements IHostConnection 
     private c2d: string;
 
     constructor(onUpdateShadow?: OnUpdateShadow,
-                onSendMessage?: OnSendMessage, newLogger?: any) {
+                onSendMessage?: OnSendMessage) {
         super();
         this.onUpdateShadow = onUpdateShadow;
         this.onSendMessage = onSendMessage;
-
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
 
     connect(): Promise<void> {

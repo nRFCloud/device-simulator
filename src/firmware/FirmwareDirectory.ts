@@ -4,8 +4,6 @@ import { IHostConnection } from '../connection/HostConnection';
 import { IPairingEngine } from '../pairing/PairingEngine';
 import { ISensor } from '../sensors/Sensor';
 
-let logger = require('winston');
-
 export class FirmwareDirectory {
     private firmware: Map<string, IFirmware>;
     private pairingEngine: IPairingEngine;
@@ -14,16 +12,11 @@ export class FirmwareDirectory {
 
     constructor(pairingEngine: IPairingEngine,
                 hostConnection: IHostConnection,
-                sensors: Map<string, ISensor>,
-                newLogger?: any) {
+                sensors: Map<string, ISensor>) {
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.sensors = sensors;
         this.firmware = new Map<string, IFirmware>();
-
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
 
     create() {
@@ -31,8 +24,7 @@ export class FirmwareDirectory {
             new GpsFlip(
                 this.pairingEngine,
                 this.hostConnection,
-                this.sensors,
-                logger)
+                this.sensors)
         );
     }
 

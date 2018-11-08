@@ -2,19 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Firmware_1 = require("./Firmware");
 const GpsFlip_1 = require("./nordicsemi/GpsFlip");
-let logger = require('winston');
 class FirmwareDirectory {
-    constructor(pairingEngine, hostConnection, sensors, newLogger) {
+    constructor(pairingEngine, hostConnection, sensors) {
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.sensors = sensors;
         this.firmware = new Map();
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
     create() {
-        this.firmware.set('nsrn:devices:types/device/nordicsemi/nRF91/PCA10074/gpsFlipDemo/0', new GpsFlip_1.GpsFlip(this.pairingEngine, this.hostConnection, this.sensors, logger));
+        this.firmware.set('nsrn:devices:types/device/nordicsemi/nRF91/PCA10074/gpsFlipDemo/0', new GpsFlip_1.GpsFlip(this.pairingEngine, this.hostConnection, this.sensors));
     }
     getFirmwareList() {
         if (!this.firmware) {

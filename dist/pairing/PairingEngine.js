@@ -10,14 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const Pairing_1 = require("./Pairing");
-let logger = require('winston');
+const logger = require('winston');
 class PairingEngine extends events_1.EventEmitter {
-    constructor(pairingMethods, newLogger) {
+    constructor(pairingMethods) {
         super();
         this.pairingMethods = pairingMethods;
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
     cancelRetrievePattern() {
         return __awaiter(this, void 0, void 0, function* () {

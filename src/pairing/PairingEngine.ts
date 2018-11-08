@@ -3,6 +3,7 @@ import {
     IPairingMethod, State, PairingStatus, PairingTopics, StateInitiate, StatePatternWait,
     Pairing, PairingConfig, StateTimeout, StatePatternMismatch, StatePaired
 } from './Pairing';
+const logger = require('winston');
 
 export interface IPairingEngine {
     updatePairingState(pairing: Pairing): void;
@@ -14,20 +15,14 @@ export interface IPairingEngine {
     on(event: 'patternRetrieved', listener: (pairingStatus: PairingStatus) => void): this;
 }
 
-let logger = require('winston');
-
 export class PairingEngine extends EventEmitter implements IPairingEngine {
     readonly pairingMethods: Array<IPairingMethod>;
     private previousPairing: Pairing;
     private selectedPairingMethod: IPairingMethod;
 
-    constructor(pairingMethods: Array<IPairingMethod>, newLogger?: any) {
+    constructor(pairingMethods: Array<IPairingMethod>) {
         super();
         this.pairingMethods = pairingMethods;
-
-        if (newLogger) {
-            logger = newLogger;
-        }
     }
 
     private async cancelRetrievePattern(): Promise<void> {
