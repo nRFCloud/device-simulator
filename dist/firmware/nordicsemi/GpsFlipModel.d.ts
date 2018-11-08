@@ -7,7 +7,7 @@
  * Message format for Alta Demopack 1 GPS/FLIP App
  */
 export interface DemopackMessage {
-    appId: ("GPS" | "FLIP");
+    appId: ("GPS" | "FLIP" | "TEMP");
     messageType: ("HELLO" | "START" | "STOP" | "INT" | "GET" | "STATUS" | "DATA" | "OK" | "EVENT");
     /**
      * This number is incremented by one for each message transmitted

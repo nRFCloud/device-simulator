@@ -12,7 +12,8 @@
             "type": "string",
             "enum": [
                 "GPS",
-                "FLIP"
+                "FLIP",
+                "TEMP"
             ]
         },
         "messageType": {

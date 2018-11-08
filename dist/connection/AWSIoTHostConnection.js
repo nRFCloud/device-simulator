@@ -155,6 +155,7 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
             if (!this.mqtt) {
                 throw new HostConnection_1.HostConnectionError('No MQTT client provided.');
             }
+            logger.debug(`Sending message: ${message}`);
             return new Promise((resolve, reject) => {
                 this.mqtt.publish(this.d2c, message, null, (error) => {
                     if (error) {

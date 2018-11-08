@@ -20,6 +20,8 @@ const GPS_SEND_INTERVAL = 10000;
 
 const FLIP = 'FLIP';
 
+const TEMP = 'TEMP';
+
 enum Orientation {
     NORMAL,
     UPSIDE_DOWN,
@@ -105,6 +107,10 @@ class Flip {
     }
 }
 
+class Temp {
+    constructor(readonly sensor: ISensor) { }
+}
+
 export class GpsFlip implements IFirmware {
     private config: ConfigurationData;
     private pairingEngine: IPairingEngine;
@@ -114,6 +120,7 @@ export class GpsFlip implements IFirmware {
     private sensors: Map<string, ISensor>;
     private gps: Gps;
     private flip: Flip;
+    private temp: Temp;
 
     constructor(
         config: ConfigurationData,
@@ -192,6 +199,24 @@ export class GpsFlip implements IFirmware {
         });
     }
 
+    private sendTempData(timestamp: number, data: string): void {
+        const timeStamp = new Date(timestamp).toISOString();
+        logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
+        logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
+
+        const message = <DemopackMessage>{
+            appId: TEMP,
+            messageType: 'DATA',
+            data
+        };
+
+        this.state.messages.sent++;
+
+        this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
+            logger.error(`Error sending TEMP sensor data to nRF Cloud. Error is ${error.message}.`);
+        });
+    }
+
     private async startApplication(pairing: Pairing): Promise<void> {
         if (pairing.state === 'paired') {
             if (pairing.topics && pairing.topics.d2c) {
@@ -199,7 +224,6 @@ export class GpsFlip implements IFirmware {
 
                 if (this.gps) {
                     await this.sendGeneric(GPS, 'HELLO', Date.now());
-
                     if (!this.gps.sensor.isStarted()) {
                         await this.gps.sensor.start();
                     }
@@ -209,6 +233,13 @@ export class GpsFlip implements IFirmware {
                     await this.sendGeneric(FLIP, 'HELLO', Date.now());
                     if (!this.flip.sensor.isStarted()) {
                         await this.flip.sensor.start();
+                    }
+                }
+
+                if (this.temp) {
+                    await this.sendGeneric(TEMP, 'HELLO', Date.now());
+                    if (!this.temp.sensor.isStarted()) {
+                        await this.temp.sensor.start();
                     }
                 }
 
@@ -229,6 +260,10 @@ export class GpsFlip implements IFirmware {
 
             if (this.flip) {
                 await this.flip.sensor.stop();
+            }
+
+            if (this.temp) {
+                await this.temp.sensor.stop();
             }
 
             this.applicationStarted = false;
@@ -325,6 +360,16 @@ export class GpsFlip implements IFirmware {
             });
         }
 
+        const temp = this.sensors.get('temp');
+
+        if (temp) {
+            this.temp = new Temp(temp);
+
+            temp.on('data', (timestamp: number, data) => {
+                this.sendTempData(timestamp, String.fromCharCode.apply(null, data));
+            });
+        }
+
         this.hostConnection.on('message', (message: any) => {
             const demopackMessage = <DemopackMessage>Object.assign({}, message);
 
@@ -332,6 +377,8 @@ export class GpsFlip implements IFirmware {
                 logger.info(`Received GPS message ${JSON.stringify(demopackMessage)}. Discarding it.`);
             } else if (demopackMessage.appId === FLIP) {
                 logger.info(`Received FLIP message ${JSON.stringify(demopackMessage)}. Discarding it.`);
+            } else if (demopackMessage.appId === TEMP) {
+                logger.info(`Received TEMP message ${JSON.stringify(demopackMessage)}. Discarding it.`);
             } else {
                 logger.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
             }

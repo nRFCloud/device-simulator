@@ -18,6 +18,7 @@ let logger = require('winston');
 const GPS = 'GPS';
 const GPS_SEND_INTERVAL = 10000;
 const FLIP = 'FLIP';
+const TEMP = 'TEMP';
 var Orientation;
 (function (Orientation) {
     Orientation[Orientation["NORMAL"] = 0] = "NORMAL";
@@ -83,6 +84,11 @@ class Flip {
         return retval;
     }
 }
+class Temp {
+    constructor(sensor) {
+        this.sensor = sensor;
+    }
+}
 class GpsFlip {
     constructor(config, pairingEngine, hostConnection, sensors, newLogger) {
         this.config = config;
@@ -142,6 +148,20 @@ class GpsFlip {
             logger.error(`Error sending FLIP data to nRF Cloud. Error is ${error.message}.`);
         });
     }
+    sendTempData(timestamp, data) {
+        const timeStamp = new Date(timestamp).toISOString();
+        logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
+        logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
+        const message = {
+            appId: TEMP,
+            messageType: 'DATA',
+            data
+        };
+        this.state.messages.sent++;
+        this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
+            logger.error(`Error sending TEMP sensor data to nRF Cloud. Error is ${error.message}.`);
+        });
+    }
     startApplication(pairing) {
         return __awaiter(this, void 0, void 0, function* () {
             if (pairing.state === 'paired') {
@@ -157,6 +177,12 @@ class GpsFlip {
                         yield this.sendGeneric(FLIP, 'HELLO', Date.now());
                         if (!this.flip.sensor.isStarted()) {
                             yield this.flip.sensor.start();
+                        }
+                    }
+                    if (this.temp) {
+                        yield this.sendGeneric(TEMP, 'HELLO', Date.now());
+                        if (!this.temp.sensor.isStarted()) {
+                            yield this.temp.sensor.start();
                         }
                     }
                     this.applicationStarted = true;
@@ -176,6 +202,9 @@ class GpsFlip {
                 }
                 if (this.flip) {
                     yield this.flip.sensor.stop();
+                }
+                if (this.temp) {
+                    yield this.temp.sensor.stop();
                 }
                 this.applicationStarted = false;
             }
@@ -255,6 +284,13 @@ class GpsFlip {
                     }
                 });
             }
+            const temp = this.sensors.get('temp');
+            if (temp) {
+                this.temp = new Temp(temp);
+                temp.on('data', (timestamp, data) => {
+                    this.sendTempData(timestamp, String.fromCharCode.apply(null, data));
+                });
+            }
             this.hostConnection.on('message', (message) => {
                 const demopackMessage = Object.assign({}, message);
                 if (demopackMessage.appId === GPS) {
@@ -262,6 +298,9 @@ class GpsFlip {
                 }
                 else if (demopackMessage.appId === FLIP) {
                     logger.info(`Received FLIP message ${JSON.stringify(demopackMessage)}. Discarding it.`);
+                }
+                else if (demopackMessage.appId === TEMP) {
+                    logger.info(`Received TEMP message ${JSON.stringify(demopackMessage)}. Discarding it.`);
                 }
                 else {
                     logger.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);

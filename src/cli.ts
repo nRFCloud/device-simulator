@@ -14,6 +14,7 @@ import { FakeGps } from './sensors/FakeGps';
 import { AWSIoTHostConnection } from './connection/AWSIoTHostConnection';
 import { SwitchesMethod } from './pairing/methods/ButtonsMethod';
 import { FakeAccelerometer } from './sensors/FakeAccelerometer';
+import FakeThermometer from './sensors/FakeThermometer';
 
 let winston = require('winston');
 let ran = false;
@@ -68,6 +69,10 @@ async function startSimulation(configFilename: string, firmwareNsrn: string, opt
         sensors.set('acc', new FakeAccelerometer(options.acc, true, 1000));
     }
 
+    if (options && options.temp) {
+        sensors.set('temp', new FakeThermometer(options.temp, true, 2500));
+    }
+
     const firmwareDirectory = new FirmwareDirectory(
         config,
         pairingEngine,
@@ -87,13 +92,15 @@ program
 .option('-c, --config [config]', 'Configuration file containing credentials.')
 .option('-n, --nmea [nmea]', 'File containing NMEA sentences.')
 .option('-a, --acc [acc]', 'File containing accelerometer recordings.')
+.option('-t, --temp [temp]', 'File containing temperature recordings.')
 .action((cmd: any, env: any) => {
     ran = true;
-    const { nmea, acc } = env;
+    const { nmea, acc, temp } = env;
 
     startSimulation(env['config'], cmd, {
         nmea,
-        acc
+        acc,
+        temp
     }).then(retval => {
         console.log(`Simulator stopped with return value ${retval}.`);
     }).catch(error => {
