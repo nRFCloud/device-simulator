@@ -1,5 +1,4 @@
 import { FirmwareError, FirmwareState, IFirmware, MessageStatus } from '../Firmware';
-import { ConfigurationData } from '../../ConfigurationStorage';
 import { IPairingEngine } from '../../pairing/PairingEngine';
 import { IHostConnection } from '../../connection/HostConnection';
 import { ShadowModel, ShadowModelDesired, ShadowModelReported } from '../../ShadowModel';
@@ -18,7 +17,6 @@ let logger = require('winston');
 export type SendMessage = (timestamp: number, message: DemopackMessage) => void;
 
 export class GpsFlip implements IFirmware {
-    private config: ConfigurationData;
     private pairingEngine: IPairingEngine;
     private state: FirmwareState;
     private hostConnection: IHostConnection;
@@ -27,12 +25,10 @@ export class GpsFlip implements IFirmware {
     private apps: App[] = [];
 
     constructor(
-        config: ConfigurationData,
         pairingEngine: IPairingEngine,
         hostConnection: IHostConnection,
         sensors: Map<string, ISensor>,
         newLogger?: any) {
-        this.config = config;
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.state = <FirmwareState>{

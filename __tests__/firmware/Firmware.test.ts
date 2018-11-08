@@ -19,7 +19,6 @@ const accelerometerRecording = '__tests__/sensors/accelerometer-recording.txt';
 describe('firmware directory', () => {
     beforeEach(async () => {
         const configurationStorage = new MemoryConfigurationStorage(<ConfigurationData>{});
-        const config = await configurationStorage.getConfiguration();
 
         const pairingMethods = [new DummyMethod([1, 2, 3, 4, 5, 6]), new SwitchesMethod(4)];
         const pairingEngine = new PairingEngine(pairingMethods);
@@ -42,7 +41,6 @@ describe('firmware directory', () => {
         sensors.set('acc', new FakeAccelerometer(accelerometerRecording, false, 10));
 
         firmwareDirectory = new FirmwareDirectory(
-            config,
             pairingEngine,
             hostConnection,
             sensors,

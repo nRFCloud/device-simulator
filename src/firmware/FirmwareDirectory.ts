@@ -2,24 +2,20 @@ import { FirmwareError, IFirmware } from './Firmware';
 import { GpsFlip } from './nordicsemi/GpsFlip';
 import { IHostConnection } from '../connection/HostConnection';
 import { IPairingEngine } from '../pairing/PairingEngine';
-import { ConfigurationData } from '../ConfigurationStorage';
 import { ISensor } from '../sensors/Sensor';
 
 let logger = require('winston');
 
 export class FirmwareDirectory {
     private firmware: Map<string, IFirmware>;
-    private config: ConfigurationData;
     private pairingEngine: IPairingEngine;
     private hostConnection: IHostConnection;
     private sensors: Map<string, ISensor>;
 
-    constructor(config: ConfigurationData,
-                pairingEngine: IPairingEngine,
+    constructor(pairingEngine: IPairingEngine,
                 hostConnection: IHostConnection,
                 sensors: Map<string, ISensor>,
                 newLogger?: any) {
-        this.config = config;
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.sensors = sensors;
@@ -33,7 +29,6 @@ export class FirmwareDirectory {
     create() {
         this.firmware.set('nsrn:devices:types/device/nordicsemi/nRF91/PCA10074/gpsFlipDemo/0',
             new GpsFlip(
-                this.config,
                 this.pairingEngine,
                 this.hostConnection,
                 this.sensors,

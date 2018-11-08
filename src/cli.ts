@@ -61,7 +61,6 @@ async function startSimulation(configFilename: string, firmwareNsrn: string, opt
     }
 
     const firmwareDirectory = new FirmwareDirectory(
-        config,
         pairingEngine,
         hostConnection,
         sensors,

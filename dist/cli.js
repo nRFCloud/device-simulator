@@ -54,7 +54,7 @@ function startSimulation(configFilename, firmwareNsrn, options) {
         if (options && options.temp) {
             sensors.set('temp', new FakeThermometer_1.default(options.temp, true, 2500));
         }
-        const firmwareDirectory = new FirmwareDirectory_1.FirmwareDirectory(config, pairingEngine, hostConnection, sensors, logger_1.default);
+        const firmwareDirectory = new FirmwareDirectory_1.FirmwareDirectory(pairingEngine, hostConnection, sensors, logger_1.default);
         firmwareDirectory.create();
         const firmware = firmwareDirectory.getFirmware(firmwareNsrn);
         return firmware.main();

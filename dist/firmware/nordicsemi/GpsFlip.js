@@ -12,7 +12,7 @@ const Firmware_1 = require("../Firmware");
 const App_1 = require("./App/App");
 let logger = require('winston');
 class GpsFlip {
-    constructor(config, pairingEngine, hostConnection, sensors, newLogger) {
+    constructor(pairingEngine, hostConnection, sensors, newLogger) {
         this.apps = [];
         this.sendMessage = (timestamp, message) => {
             const timeStamp = new Date(timestamp).toISOString();
@@ -23,7 +23,6 @@ class GpsFlip {
                 logger.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
             });
         };
-        this.config = config;
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.state = {
