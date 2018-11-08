@@ -22,23 +22,13 @@ const AWSIoTHostConnection_1 = require("./connection/AWSIoTHostConnection");
 const ButtonsMethod_1 = require("./pairing/methods/ButtonsMethod");
 const FakeAccelerometer_1 = require("./sensors/FakeAccelerometer");
 const FakeThermometer_1 = require("./sensors/FakeThermometer");
-let winston = require('winston');
+const logger_1 = require("./logger");
 let ran = false;
 process.on('unhandledRejection', function (reason, p) {
     console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
 });
-function getLogger() {
-    const transports = [
-        new winston.transports.Console({
-            name: 'console',
-            level: 'debug'
-        })
-    ];
-    return new winston.Logger({ transports });
-}
 function startSimulation(configFilename, firmwareNsrn, options) {
     return __awaiter(this, void 0, void 0, function* () {
-        const logger = getLogger();
         if (configFilename == null) {
             configFilename = path.join(os.homedir(), '.nrfcloud', 'simulator_config.json');
         }
@@ -53,7 +43,7 @@ function startSimulation(configFilename, firmwareNsrn, options) {
             new ButtonsMethod_1.SwitchesMethod(4)
         ];
         const pairingEngine = new PairingEngine_1.PairingEngine(pairingMethods);
-        const hostConnection = new AWSIoTHostConnection_1.AWSIoTHostConnection(config, logger);
+        const hostConnection = new AWSIoTHostConnection_1.AWSIoTHostConnection(config, logger_1.default);
         const sensors = new Map();
         if (options && options.nmea) {
             sensors.set('gps', new FakeGps_1.FakeGps(options.nmea, ['GPGGA']));
@@ -64,7 +54,7 @@ function startSimulation(configFilename, firmwareNsrn, options) {
         if (options && options.temp) {
             sensors.set('temp', new FakeThermometer_1.default(options.temp, true, 2500));
         }
-        const firmwareDirectory = new FirmwareDirectory_1.FirmwareDirectory(config, pairingEngine, hostConnection, sensors, logger);
+        const firmwareDirectory = new FirmwareDirectory_1.FirmwareDirectory(config, pairingEngine, hostConnection, sensors, logger_1.default);
         firmwareDirectory.create();
         const firmware = firmwareDirectory.getFirmware(firmwareNsrn);
         return firmware.main();

@@ -9,88 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Firmware_1 = require("../Firmware");
-const FakeAccelerometer_1 = require("../../sensors/FakeAccelerometer");
-//
-// Simulate behaviour of Alta device:
-//   https://projecttools.nordicsemi.no/jira/browse/IS-1130
-//
+const App_1 = require("./App/App");
 let logger = require('winston');
-const GPS = 'GPS';
-const GPS_SEND_INTERVAL = 10000;
-const FLIP = 'FLIP';
-const TEMP = 'TEMP';
-var Orientation;
-(function (Orientation) {
-    Orientation[Orientation["NORMAL"] = 0] = "NORMAL";
-    Orientation[Orientation["UPSIDE_DOWN"] = 1] = "UPSIDE_DOWN";
-})(Orientation || (Orientation = {}));
-class Gps {
-    constructor(gps) {
-        this.lastGpsSend = 0;
-        this.gps = gps;
-    }
-    get sensor() {
-        return this.gps;
-    }
-}
-class Flip {
-    constructor(acc) {
-        this.currentOrientation = Orientation.NORMAL;
-        this.lastOrientationChange = 0;
-        this.acc = acc;
-    }
-    get sensor() {
-        return this.acc;
-    }
-    update(timestamp, sample) {
-        this.updateOrientation(timestamp, sample);
-    }
-    get orientation() {
-        switch (this.currentOrientation) {
-            case Orientation.NORMAL:
-                return 'NORMAL';
-            case Orientation.UPSIDE_DOWN:
-                return 'UPSIDE_DOWN';
-            default:
-                logger.error(`Unknown orientation`);
-                return '';
-        }
-    }
-    updateOrientation(timestamp, sample) {
-        const previousOrientation = this.currentOrientation;
-        switch (this.currentOrientation) {
-            case Orientation.NORMAL:
-                if (sample.Z < -40) {
-                    this.currentOrientation = Orientation.UPSIDE_DOWN;
-                }
-                break;
-            case Orientation.UPSIDE_DOWN:
-                if (sample.Z > 40) {
-                    this.currentOrientation = Orientation.NORMAL;
-                }
-                break;
-            default:
-                break;
-        }
-        if (previousOrientation !== this.currentOrientation) {
-            this.lastOrientationChange = timestamp;
-            this.orientationChange = true;
-        }
-        logger.debug(`orientation: ${previousOrientation} -> ${this.currentOrientation} @${new Date(this.lastOrientationChange).toISOString()}: ${JSON.stringify(sample)}`);
-    }
-    isChanged() {
-        const retval = this.orientationChange;
-        this.orientationChange = false;
-        return retval;
-    }
-}
-class Temp {
-    constructor(sensor) {
-        this.sensor = sensor;
-    }
-}
 class GpsFlip {
     constructor(config, pairingEngine, hostConnection, sensors, newLogger) {
+        this.apps = [];
+        this.sendMessage = (timestamp, message) => {
+            const timeStamp = new Date(timestamp).toISOString();
+            logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
+            logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
+            this.state.messages.sent++;
+            this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
+                logger.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
+            });
+        };
         this.config = config;
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
@@ -107,83 +39,13 @@ class GpsFlip {
             logger = newLogger;
         }
     }
-    sendGeneric(appId, messageType, timestamp) {
-        const timeStamp = new Date(timestamp).toISOString();
-        logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
-        logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
-        const message = {
-            appId,
-            messageType: messageType,
-        };
-        this.state.messages.sent++;
-        this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
-            logger.error(`Error sending ${messageType} to nRF Cloud. Error is ${error.message}.`);
-        });
-    }
-    sendGpsData(timestamp, data) {
-        const timeStamp = new Date(timestamp).toISOString();
-        logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
-        logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
-        const message = {
-            appId: GPS,
-            messageType: 'DATA',
-            data
-        };
-        this.state.messages.sent++;
-        this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
-            logger.error(`Error sending GPS sensor data to nRF Cloud. Error is ${error.message}.`);
-        });
-    }
-    sendFlipData(timestamp, data) {
-        const timeStamp = new Date(timestamp).toISOString();
-        logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
-        logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
-        const message = {
-            appId: FLIP,
-            messageType: 'DATA',
-            data
-        };
-        this.state.messages.sent++;
-        this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
-            logger.error(`Error sending FLIP data to nRF Cloud. Error is ${error.message}.`);
-        });
-    }
-    sendTempData(timestamp, data) {
-        const timeStamp = new Date(timestamp).toISOString();
-        logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
-        logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
-        const message = {
-            appId: TEMP,
-            messageType: 'DATA',
-            data
-        };
-        this.state.messages.sent++;
-        this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
-            logger.error(`Error sending TEMP sensor data to nRF Cloud. Error is ${error.message}.`);
-        });
-    }
     startApplication(pairing) {
         return __awaiter(this, void 0, void 0, function* () {
             if (pairing.state === 'paired') {
                 if (pairing.topics && pairing.topics.d2c) {
                     yield this.hostConnection.setTopics(pairing.topics.c2d, pairing.topics.d2c);
-                    if (this.gps) {
-                        yield this.sendGeneric(GPS, 'HELLO', Date.now());
-                        if (!this.gps.sensor.isStarted()) {
-                            yield this.gps.sensor.start();
-                        }
-                    }
-                    if (this.flip) {
-                        yield this.sendGeneric(FLIP, 'HELLO', Date.now());
-                        if (!this.flip.sensor.isStarted()) {
-                            yield this.flip.sensor.start();
-                        }
-                    }
-                    if (this.temp) {
-                        yield this.sendGeneric(TEMP, 'HELLO', Date.now());
-                        if (!this.temp.sensor.isStarted()) {
-                            yield this.temp.sensor.start();
-                        }
+                    for (const app of this.apps) {
+                        yield app.start();
                     }
                     this.applicationStarted = true;
                     logger.info(`Pairing done, application started.`);
@@ -197,14 +59,8 @@ class GpsFlip {
     stopApplication() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.applicationStarted) {
-                if (this.gps) {
-                    yield this.gps.sensor.stop();
-                }
-                if (this.flip) {
-                    yield this.flip.sensor.stop();
-                }
-                if (this.temp) {
-                    yield this.temp.sensor.stop();
+                for (const app of this.apps) {
+                    yield app.stop();
                 }
                 this.applicationStarted = false;
             }
@@ -241,13 +97,6 @@ class GpsFlip {
             }
         }));
     }
-    static convertToInt8(data) {
-        const dest = new Int8Array(data.length);
-        data.forEach((value, idx) => {
-            dest[idx] = value << 24 >> 24;
-        });
-        return dest;
-    }
     main() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.sensors) {
@@ -263,48 +112,10 @@ class GpsFlip {
             this.hostConnection.on('disconnect', () => {
                 logger.info('Disconnected from nRF Cloud.');
             });
-            const gps = this.sensors.get('gps');
-            if (gps) {
-                this.gps = new Gps(gps);
-                gps.on('data', (timestamp, data) => {
-                    if (Date.now() >= this.gps.lastGpsSend + GPS_SEND_INTERVAL) {
-                        this.sendGpsData(timestamp, String.fromCharCode.apply(null, data));
-                        this.gps.lastGpsSend = Date.now();
-                    }
-                });
-            }
-            const acc = this.sensors.get('acc');
-            if (acc) {
-                this.flip = new Flip(acc);
-                acc.on('data', (timestamp, data) => {
-                    const sample = FakeAccelerometer_1.Sample.fromArray(GpsFlip.convertToInt8(data));
-                    this.flip.update(timestamp, sample);
-                    if (this.flip.isChanged()) {
-                        this.sendFlipData(timestamp, this.flip.orientation);
-                    }
-                });
-            }
-            const temp = this.sensors.get('temp');
-            if (temp) {
-                this.temp = new Temp(temp);
-                temp.on('data', (timestamp, data) => {
-                    this.sendTempData(timestamp, String.fromCharCode.apply(null, data));
-                });
-            }
+            this.apps = Array.from(this.sensors.entries()).map(([name, sensor]) => App_1.createApp(name, sensor, this.sendMessage));
             this.hostConnection.on('message', (message) => {
                 const demopackMessage = Object.assign({}, message);
-                if (demopackMessage.appId === GPS) {
-                    logger.info(`Received GPS message ${JSON.stringify(demopackMessage)}. Discarding it.`);
-                }
-                else if (demopackMessage.appId === FLIP) {
-                    logger.info(`Received FLIP message ${JSON.stringify(demopackMessage)}. Discarding it.`);
-                }
-                else if (demopackMessage.appId === TEMP) {
-                    logger.info(`Received TEMP message ${JSON.stringify(demopackMessage)}. Discarding it.`);
-                }
-                else {
-                    logger.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
-                }
+                logger.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
             });
             yield this.hostConnection.connect();
             return new Promise(() => {

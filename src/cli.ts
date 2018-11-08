@@ -15,28 +15,15 @@ import { AWSIoTHostConnection } from './connection/AWSIoTHostConnection';
 import { SwitchesMethod } from './pairing/methods/ButtonsMethod';
 import { FakeAccelerometer } from './sensors/FakeAccelerometer';
 import FakeThermometer from './sensors/FakeThermometer';
+import logger from './logger';
 
-let winston = require('winston');
 let ran = false;
 
 process.on('unhandledRejection', function (reason, p) {
     console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
 });
 
-function getLogger() {
-    const transports = [
-        new winston.transports.Console({
-            name: 'console',
-            level: 'debug'
-        })
-    ];
-
-    return new winston.Logger({transports});
-}
-
 async function startSimulation(configFilename: string, firmwareNsrn: string, options: any): Promise<number> {
-    const logger = getLogger();
-
     if (configFilename == null) {
         configFilename = path.join(os.homedir(), '.nrfcloud', 'simulator_config.json');
     }
