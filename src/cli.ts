@@ -14,8 +14,6 @@ import { FakeAccelerometer } from './sensors/FakeAccelerometer';
 import FakeThermometer from './sensors/FakeThermometer';
 import App from './app/App';
 
-let ran = false;
-
 process.on('unhandledRejection', function (reason, p) {
     console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
 });
@@ -49,24 +47,14 @@ async function startSimulation({config = defaultConfig, nmea, acc, temp}: progra
 }
 
 program
-    .command('start')
-    .option('-c, --config [config]', 'Configuration file containing credentials.')
-    .option('-n, --nmea [nmea]', 'File containing NMEA sentences.')
-    .option('-a, --acc [acc]', 'File containing accelerometer recordings.')
-    .option('-t, --temp [temp]', 'File containing temperature recordings.')
-    .action((command: program.Command) => {
-        ran = true;
+    .option('-c, --config <config>', 'Configuration file containing credentials.')
+    .option('-n, --nmea <nmea>', 'File containing NMEA sentences.')
+    .option('-a, --acc <acc>', 'File containing accelerometer recordings.')
+    .option('-t, --temp <temp>', 'File containing temperature recordings.')
+    .parse(process.argv);
 
-        startSimulation(command).then(retval => {
-            console.log(`Simulator stopped with return value ${retval}.`);
-        }).catch(error => {
-            process.stderr.write(`${red(error)}\n`);
-        });
-    });
-
-program.parse(process.argv);
-
-if (!ran) {
-    program.outputHelp();
-    process.exit(1);
-}
+startSimulation(program).then(retval => {
+    console.log(`Simulator stopped with return value ${retval}.`);
+}).catch(error => {
+    process.stderr.write(`${red(error)}\n`);
+});
