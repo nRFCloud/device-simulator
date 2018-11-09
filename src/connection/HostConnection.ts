@@ -8,8 +8,8 @@ export class HostConnectionError extends Error {
 }
 
 export interface IHostConnection extends EventEmitter {
-    connect(): Promise<void>;
-    disconnect(): Promise<void>;
+    connect(): Promise<void> | void;
+    disconnect(): Promise<void> | void;
 
     updateShadow(reported: ShadowModelReported): Promise<void>;
     sendMessage(message: any): Promise<void>;

@@ -60,7 +60,7 @@ export default class extends EventEmitter implements ISensor {
         this.setupReader();
     }
 
-    async stop(): Promise<void> {
+    stop() {
         this.doRun = false;
     }
 

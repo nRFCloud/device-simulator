@@ -15,11 +15,10 @@ const PatternArrayType = t.refinement(
 
 export interface IPairingMethod {
     readonly methodName: string;
-    readonly patternLength: number;
 
     retrievePattern(length: number): Promise<Array<number>>;
 
-    cancelRetrievePattern(): Promise<void>;
+    cancelRetrievePattern(): Promise<void> | void;
 }
 
 export class Pairing {
@@ -58,14 +57,13 @@ export abstract class State {
 
     abstract update(previous?: State): State;
 
-    static STATE = {
+    static STATE: {[index: string]: string} = {
         initiate: 'initiate',
         paired: 'paired',
         patternWait: 'pattern_wait',
         patternMismatch: 'pattern_mismatch',
         timeout: 'timeout'
     };
-
 }
 
 export class StateInitiate extends State {
@@ -94,8 +92,8 @@ export class StatePaired extends State {
         if (previous && previous.state === State.STATE.paired && (previous instanceof StatePaired)) {
             return new StatePaired(previous.topics ?
                 new PairingTopics(
-                    this.topics.c2d ? this.topics.c2d : previous.topics.c2d,
-                    this.topics.d2c ? this.topics.d2c : previous.topics.d2c
+                    this.topics && this.topics.c2d ? this.topics.c2d : previous.topics.c2d,
+                    this.topics && this.topics.d2c ? this.topics.d2c : previous.topics.d2c
                 ) : undefined);
         } else {
             return StatePaired.copy(this);

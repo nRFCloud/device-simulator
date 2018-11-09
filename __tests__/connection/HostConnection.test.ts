@@ -3,20 +3,12 @@ import { FakeHostConnection } from '../../src/connection/FakeHostConnection';
 
 let hostConnection: IHostConnection;
 
-let shadowGetAcceptedMock: any;
-let shadowDeltaMock: any;
 let disconnectMock: any;
 let connectMock: any;
 
 describe('device', () => {
     beforeEach(() => {
         hostConnection = new FakeHostConnection();
-
-        shadowGetAcceptedMock = jest.fn();
-        hostConnection.on('shadowGetAccepted', shadowGetAcceptedMock);
-
-        shadowDeltaMock = jest.fn();
-        hostConnection.on('shadowDelta', shadowDeltaMock);
 
         connectMock = jest.fn();
         hostConnection.on('connect', connectMock);

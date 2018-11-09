@@ -43,7 +43,7 @@ export class FirmwareDirectory {
         return retval;
     }
 
-    getFirmware(firmware: string): IFirmware {
+    getFirmware(firmware: string): IFirmware | undefined {
         if (!this.firmware) {
             throw new FirmwareError(`No firmware registered with directory.`);
         }

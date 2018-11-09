@@ -4,7 +4,7 @@ import { ISensor } from './Sensor';
 export class DummySensor extends EventEmitter implements ISensor {
     private dummyData: Uint8Array;
     private interval: number;
-    private tick: NodeJS.Timer;
+    private tick?: NodeJS.Timer;
     private started: boolean;
 
     constructor(dummyData: Uint8Array, interval: number) {

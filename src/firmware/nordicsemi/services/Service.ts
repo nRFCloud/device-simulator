@@ -1,4 +1,4 @@
 export default interface Service {
-    start();
-    stop();
+    start(): Promise<void>;
+    stop(): Promise<void>;
 }

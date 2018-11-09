@@ -23,7 +23,7 @@ const convertToInt8 = (data: Uint8Array): Int8Array => {
 
 export default class implements Service {
     private currentOrientation = Orientation.NORMAL;
-    private orientationChange: boolean;
+    private orientationChange = false;
 
     constructor(private readonly sensor: ISensor, private readonly sendMessage: SendMessage) { }
 
@@ -33,7 +33,8 @@ export default class implements Service {
         this.sensor.on('data', (timestamp: number, data) => {
             const sample = Sample.fromArray(convertToInt8(data));
             this.updateOrientation(sample);
-            if (this.isChanged()) {
+            if (this.orientationChange) {
+                this.orientationChange = false;
                 const message = <DemopackMessage>{
                     appId: APPID,
                     messageType: 'DATA',
@@ -88,14 +89,6 @@ export default class implements Service {
                 break;
         }
 
-        if (previousOrientation !== this.currentOrientation) {
-            this.orientationChange = true;
-        }
-    }
-
-    isChanged(): boolean {
-        const retval = this.orientationChange;
-        this.orientationChange = false;
-        return retval;
+        this.orientationChange = previousOrientation !== this.currentOrientation;
     }
 }

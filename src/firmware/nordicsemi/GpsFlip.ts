@@ -37,6 +37,7 @@ export class GpsFlip implements IFirmware {
                 received: 0,
             },
         };
+        this.applicationStarted = false;
         this.sensors = sensors;
     }
 
@@ -71,7 +72,6 @@ export class GpsFlip implements IFirmware {
 
     private async stopApplication(): Promise<void> {
         if (this.applicationStarted) {
-
             for (const service of this.services) {
                 await service.stop();
             }

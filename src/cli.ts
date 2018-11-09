@@ -1,9 +1,8 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
-
-const program = require('commander');
-const {red} = require('colors');
+import * as program from 'commander';
+import { red } from 'colors';
 
 import { FileConfigurationStorage } from './ConfigurationStorage';
 import { PairingEngine } from './pairing/PairingEngine';
@@ -67,7 +66,7 @@ async function startSimulation(configFilename: string, firmwareNsrn: string, opt
     firmwareDirectory.create();
 
     const firmware = firmwareDirectory.getFirmware(firmwareNsrn);
-    return firmware.main();
+    return firmware!.main();
 }
 
 program

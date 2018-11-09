@@ -16,8 +16,8 @@ export interface IPairingEngine {
 
 export class PairingEngine extends EventEmitter implements IPairingEngine {
     readonly pairingMethods: Array<IPairingMethod>;
-    private previousPairing: Pairing;
-    private selectedPairingMethod: IPairingMethod;
+    private previousPairing?: Pairing;
+    private selectedPairingMethod?: IPairingMethod;
 
     constructor(pairingMethods: Array<IPairingMethod>) {
         super();
@@ -26,9 +26,9 @@ export class PairingEngine extends EventEmitter implements IPairingEngine {
 
     private async cancelRetrievePattern(): Promise<void> {
         if (this.pairingMethods && this.selectedPairingMethod) {
-            const foundMethod = this.pairingMethods.find(method => {
-                return method.methodName === this.selectedPairingMethod.methodName;
-            });
+            const foundMethod = this.pairingMethods.find(method =>
+                method.methodName === this.selectedPairingMethod!.methodName
+            );
 
             if (!foundMethod) {
                 throw new Error(`Pairing method ${this.selectedPairingMethod.methodName} is not registered with the pairing engine.`);
@@ -63,7 +63,7 @@ export class PairingEngine extends EventEmitter implements IPairingEngine {
         }
     }
 
-    private stateFactory(pairing: Pairing): State | null {
+    private stateFactory(pairing?: Pairing): State | null {
         if (pairing == null) {
             return null;
         }
@@ -122,7 +122,7 @@ export class PairingEngine extends EventEmitter implements IPairingEngine {
 
         const state = this.stateFactory(pairing);
 
-        const localState = state.update(previousState);
+        const localState = state!.update(previousState!);
 
         switch (localState.state) {
             case 'pattern_wait':

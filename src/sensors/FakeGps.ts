@@ -4,22 +4,17 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 
 export class FakeGps extends EventEmitter implements ISensor {
-    private nmeaRecording: string;
-    private nmeaSeconds: any;
-    private currentNmeaSecond: number;
-    private sentenceFilter: Array<string>;
+    private readonly nmeaSeconds: any = {};
+    private currentNmeaSecond?: number;
 
-    private reader: readline.ReadLine;
-    private readStream: fs.ReadStream;
-    private nmeaTick: NodeJS.Timer;
+    private reader?: readline.ReadLine;
+    private readStream?: fs.ReadStream;
+    private nmeaTick?: NodeJS.Timer;
 
-    private started: boolean;
+    private started = false;
 
-    constructor(nmeaRecording: string, sentenceFilter: Array<string>) {
+    constructor(private readonly nmeaRecording: string, private readonly sentenceFilter: Array<string>) {
         super();
-        this.nmeaRecording = nmeaRecording;
-        this.sentenceFilter = sentenceFilter;
-        this.nmeaSeconds = {};
     }
 
     private setupNmeaReader() {
@@ -32,7 +27,7 @@ export class FakeGps extends EventEmitter implements ISensor {
             if (line.split(',')[0] === '$GPGGA') {
                 // If we already have data pause readline
                 if (this.currentNmeaSecond) {
-                    this.reader.pause();
+                    this.reader!.pause();
                 }
 
                 this.currentNmeaSecond = Date.now();
@@ -121,9 +116,8 @@ export class FakeGps extends EventEmitter implements ISensor {
         }
     }
 
-    stop(): Promise<void> {
+    stop() {
         this.cleanUp();
-        return;
     }
 
     isStarted(): boolean {

@@ -6,7 +6,7 @@ export interface ShadowModelDesired {
 }
 
 export interface ShadowModelReported {
-    pairing: Pairing;
+    pairing?: Pairing;
     stage?: string;
     pairingStatus: PairingStatus;
 }

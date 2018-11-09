@@ -1,5 +1,5 @@
 import { IHostConnection } from '../../src/connection/HostConnection';
-import { FakeHostConnection, OnSendMessage, OnUpdateShadow } from '../../src/connection/FakeHostConnection';
+import { FakeHostConnection } from '../../src/connection/FakeHostConnection';
 import { DummyMethod } from '../../src/pairing/methods/DummyMethod';
 import { PairingEngine } from '../../src/pairing/PairingEngine';
 import { ISensor } from '../../src/sensors/Sensor';
@@ -18,12 +18,7 @@ describe('firmware directory', () => {
         const pairingMethods = [new DummyMethod([1, 2, 3, 4, 5, 6]), new SwitchesMethod(4)];
         const pairingEngine = new PairingEngine(pairingMethods);
 
-        const onUpdateShadow: OnUpdateShadow = async () => { };
-        const onSendMessage: OnSendMessage = async () => { };
-
-        const hostConnection: IHostConnection = new FakeHostConnection(
-            onUpdateShadow,
-            onSendMessage);
+        const hostConnection: IHostConnection = new FakeHostConnection();
 
         const sensors: Map<string, ISensor> = new Map<string, ISensor>();
         sensors.set('gps', new FakeGps(nmeaRecording, ['GPGGA']));

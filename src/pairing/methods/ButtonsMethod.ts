@@ -1,61 +1,66 @@
 import { IPairingMethod } from '../Pairing';
 import * as readline from 'readline';
 
+const setTerminalToRawMode = (mode: boolean) => {
+    if (process.stdin.isTTY) {
+        process.stdin.setRawMode!(mode);
+    }
+};
+
+const startReadingKeypresses = (keyPressListener: (str: string) => void) => {
+    setTerminalToRawMode(true);
+    process.stdin.resume();
+    process.stdin.on('keypress', keyPressListener);
+};
+
+const stopReadingKeypresses = () => {
+    process.stdin.pause();
+    setTerminalToRawMode(false);
+    process.stdin.removeAllListeners('keypress');
+};
+
 export class SwitchesMethod implements IPairingMethod {
-    methodName: string;
-    patternLength: number;
-    numberOfButtons: number;
-    pattern: Buffer;
-    idx: number;
+    methodName = 'buttons';
     rejectRetrievePattern: any;
 
-    addKeypress(key: string) {
+    constructor(private readonly numberOfButtons: number) {
+    }
+
+    addKeypress(key: string, pattern: Buffer, idx: number) {
         const keyId = key.charCodeAt(0) - '0'.charCodeAt(0);
         if (!(keyId > 0 && keyId <= this.numberOfButtons)) {
             return;
         }
 
-        const pos = Math.floor(this.idx / 2);
-        const prev = this.pattern.readUInt8(pos);
-        const value = keyId | (prev << ((this.idx % 2) * 4));
+        const pos = Math.floor(idx / 2);
+        const prev = pattern.readUInt8(pos);
+        const value = keyId | (prev << ((idx % 2) * 4));
 
-        this.pattern.writeUInt8(value, pos);
-        this.idx++;
+        pattern.writeUInt8(value, pos);
     }
 
     retrievePattern(patternLength: number): Promise<Array<number>> {
-        this.patternLength = patternLength;
-        console.log(`Press buttons 1-${this.numberOfButtons} ${this.patternLength} times.`);
+        patternLength = patternLength;
+        console.log(`Press buttons 1-${this.numberOfButtons} ${patternLength} times.`);
 
         return new Promise<Array<number>>(resolve => {
             readline.emitKeypressEvents(process.stdin);
 
-            if (process.stdin.isTTY) {
-                process.stdin.setRawMode(true);
-            }
+            let idx = 0;
+            const pattern = Buffer.alloc(patternLength / 2 + (patternLength % 2));
 
-            this.idx = 0;
-            this.pattern = Buffer.alloc(this.patternLength / 2 + (this.patternLength % 2));
+            startReadingKeypresses((key: string) => {
+                this.addKeypress(key, pattern, idx);
+                idx++;
 
-            const keyPressListener = (str: string) => {
-                this.addKeypress(str);
-
-                if (this.idx >= this.patternLength) {
-                    console.log(`Pattern recorded. Pattern is (hex): ${this.pattern.toString('hex')}`);
-                    process.stdin.pause();
-
-                    if (process.stdin.isTTY) {
-                        process.stdin.setRawMode(false);
-                    }
-
+                if (idx >= patternLength) {
+                    console.log(`Pattern recorded. Pattern is (hex): ${pattern.toString('hex')}`);
                     this.rejectRetrievePattern = null;
-                    process.stdin.removeAllListeners('keypress');
-                    resolve(<Array<number>>Array.prototype.slice.call(this.pattern, 0));
-                }
-            };
 
-            process.stdin.resume();
-            process.stdin.on('keypress', keyPressListener);
+                    stopReadingKeypresses();
+                    resolve(<Array<number>>Array.prototype.slice.call(pattern, 0));
+                }
+            });
         });
     }
 
@@ -64,17 +69,6 @@ export class SwitchesMethod implements IPairingMethod {
             this.rejectRetrievePattern('Canceled retrieval of pattern');
         }
 
-        process.stdin.pause();
-
-        if (process.stdin.isTTY) {
-            process.stdin.setRawMode(false);
-        }
-
-        process.stdin.removeAllListeners('keypress');
-    }
-
-    constructor(numberOfButtons: number) {
-        this.numberOfButtons = numberOfButtons;
-        this.methodName = 'buttons';
+        stopReadingKeypresses();
     }
 }

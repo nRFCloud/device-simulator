@@ -51,8 +51,8 @@ export class FakeAccelerometer extends EventEmitter implements ISensor {
     private movementSensorRecording: string;
     private defaultSampleRate: number;
 
-    private reader: readline.ReadLine;
-    private readStream: fs.ReadStream;
+    private reader?: readline.ReadLine;
+    private readStream?: fs.ReadStream;
     private samples: Set<Sample | WaitDuration>;
     private doLoop: boolean;
     private doRun: boolean;

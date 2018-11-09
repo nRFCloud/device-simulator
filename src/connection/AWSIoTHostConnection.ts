@@ -7,9 +7,9 @@ import * as awsIot from 'aws-iot-device-sdk';
 
 export class AWSIoTHostConnection extends EventEmitter implements IHostConnection {
     private config: ConfigurationData;
-    private mqtt: awsIot.device;
-    private d2c: string;
-    private c2d: string;
+    private mqtt?: awsIot.device;
+    private d2c?: string;
+    private c2d?: string;
     private deltaEnabled: boolean;
 
     constructor(config: ConfigurationData) {
@@ -32,7 +32,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
         };
 
         return new Promise<void>((resolve, reject) => {
-            this.mqtt.publish(`${this.getShadowBaseTopic()}/update`, JSON.stringify(root), null, error => {
+            this.mqtt!.publish(`${this.getShadowBaseTopic()}/update`, JSON.stringify(root), undefined, (error) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -66,7 +66,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
                 rejectConnect(error);
             }
 
-            this.mqtt.on('error', (error: any) => {
+            this.mqtt!.on('error', (error: any) => {
                 console.error(`AWS IoT error ${error.message}`);
 
                 // Do a guess if gateway has been deleted on the backend
@@ -80,24 +80,24 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
                 }
             });
 
-            this.mqtt.on('connect', () => {
+            this.mqtt!.on('connect', () => {
                 this.emit('connect');
-                this.mqtt.publish(`${this.getShadowBaseTopic()}/get`, '');
+                this.mqtt!.publish(`${this.getShadowBaseTopic()}/get`, '');
 
                 if (resolveConnect) {
                     resolveConnect();
                 }
             });
 
-            this.mqtt.on('close', () => {
+            this.mqtt!.on('close', () => {
                 this.emit('disconnect');
             });
 
-            this.mqtt.on('reconnect', () => {
+            this.mqtt!.on('reconnect', () => {
                 this.emit('reconnect');
             });
 
-            this.mqtt.on('message', (topic: string, payload: any) => {
+            this.mqtt!.on('message', (topic: string, payload: any) => {
                 if (payload == null || payload === '') {
                     return;
                 }
@@ -114,7 +114,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
 
                         if (!this.deltaEnabled) {
                             this.deltaEnabled = true;
-                            this.mqtt.subscribe(`${shadowBaseTopic}/update/delta`);
+                            this.mqtt!.subscribe(`${shadowBaseTopic}/update/delta`);
                         }
 
                         break;
@@ -136,13 +136,13 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
     private async unsubscribeFromAll(): Promise<void> {
         const shadowBaseTopic = this.getShadowBaseTopic();
 
-        this.mqtt.unsubscribe(`${shadowBaseTopic}/get/accepted`);
-        this.mqtt.unsubscribe(`${shadowBaseTopic}/update/delta`);
-        this.mqtt.unsubscribe(`${shadowBaseTopic}/get`);
+        this.mqtt!.unsubscribe(`${shadowBaseTopic}/get/accepted`);
+        this.mqtt!.unsubscribe(`${shadowBaseTopic}/update/delta`);
+        this.mqtt!.unsubscribe(`${shadowBaseTopic}/get`);
 
         await new Promise<void>((resolve, reject) => {
             if (this.c2d) {
-                this.mqtt.unsubscribe(this.c2d, null, (error: any) => {
+                this.mqtt!.unsubscribe(this.c2d, undefined, (error?) => {
                     if (error) {
                         reject(error);
                     } else {
@@ -157,8 +157,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
 
     async disconnect(): Promise<void> {
         await this.unsubscribeFromAll();
-        this.mqtt.end(true);
-        return;
+        this.mqtt!.end(true);
     }
 
     async sendMessage(message: string): Promise<void> {
@@ -172,7 +171,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
 
         console.debug(`Sending message: ${message}`);
         return new Promise<void>((resolve, reject) => {
-            this.mqtt.publish(this.d2c, message, null, (error: any) => {
+            this.mqtt!.publish(this.d2c!, message, undefined, (error?) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -192,7 +191,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
         this.d2c = d2c;
 
         return new Promise<void>((resolve, reject) => {
-            this.mqtt.subscribe(c2d, null, error => {
+            this.mqtt!.subscribe(c2d, undefined, (error?) => {
                 if (error) {
                     reject(error);
                 } else {
