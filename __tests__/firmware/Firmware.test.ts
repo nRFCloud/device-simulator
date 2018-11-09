@@ -5,8 +5,6 @@ import { PairingEngine } from '../../src/pairing/PairingEngine';
 import { ISensor } from '../../src/sensors/Sensor';
 import { FakeGps } from '../../src/sensors/FakeGps';
 import { FirmwareDirectory } from '../../src/firmware/FirmwareDirectory';
-import { ConfigurationData, MemoryConfigurationStorage } from '../../src/ConfigurationStorage';
-import { ShadowModelReported } from '../../src/ShadowModel';
 import { SwitchesMethod } from '../../src/pairing/methods/ButtonsMethod';
 import { FakeAccelerometer } from '../../src/sensors/FakeAccelerometer';
 
@@ -17,18 +15,11 @@ const accelerometerRecording = '__tests__/sensors/accelerometer-recording.txt';
 
 describe('firmware directory', () => {
     beforeEach(async () => {
-        const configurationStorage = new MemoryConfigurationStorage(<ConfigurationData>{});
-
         const pairingMethods = [new DummyMethod([1, 2, 3, 4, 5, 6]), new SwitchesMethod(4)];
         const pairingEngine = new PairingEngine(pairingMethods);
 
-        const onUpdateShadow: OnUpdateShadow = async (updateShadow: ShadowModelReported) => {
-            return;
-        };
-
-        const onSendMessage: OnSendMessage = async (message: string) => {
-            return;
-        };
+        const onUpdateShadow: OnUpdateShadow = async () => { };
+        const onSendMessage: OnSendMessage = async () => { };
 
         const hostConnection: IHostConnection = new FakeHostConnection(
             onUpdateShadow,

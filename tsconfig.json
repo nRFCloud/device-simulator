@@ -1,5 +1,4 @@
 {
-    "version": "2.3.4",
     "compileOnSave": true,
     "compilerOptions": {
         "module": "commonjs",
@@ -14,9 +13,6 @@
         "noUnusedLocals": true,
         "lib": [
             "es6"
-        ],
-        "types": [
-            "node"
         ],
         "alwaysStrict": true
     },

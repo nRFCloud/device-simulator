@@ -49,7 +49,6 @@ export class Sample {
 
 export class FakeAccelerometer extends EventEmitter implements ISensor {
     private movementSensorRecording: string;
-    private currentTimestamp: number;  // Milliseconds elapsed since 1 January 1970 00:00:00 UTC, with leap seconds ignored.
     private defaultSampleRate: number;
 
     private reader: readline.ReadLine;
@@ -77,8 +76,6 @@ export class FakeAccelerometer extends EventEmitter implements ISensor {
         this.reader = readline.createInterface({
             input: this.readStream
         });
-
-        this.currentTimestamp = Date.now();
 
         this.reader.on('line', line => {
             const columns = line.split(',');
