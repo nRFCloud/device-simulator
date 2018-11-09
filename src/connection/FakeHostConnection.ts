@@ -2,7 +2,6 @@ import { IHostConnection } from './HostConnection';
 import { ShadowModelReported, ShadowModelDesired } from '../ShadowModel';
 import { EventEmitter } from 'events';
 import { Pairing } from '../pairing/Pairing';
-import logger from '../logger';
 
 export type OnUpdateShadow = (updateShadow: ShadowModelReported) => Promise<void>;
 export type OnSendMessage = (topic: string, message: string) => Promise<void>;
@@ -42,7 +41,7 @@ export class FakeHostConnection extends EventEmitter implements IHostConnection 
     }
 
     async updateShadow(reported: ShadowModelReported): Promise<void> {
-        logger.debug(`Fake: Updating shadow.reported on host '${JSON.stringify(reported)}'`);
+        console.debug(`Fake: Updating shadow.reported on host '${JSON.stringify(reported)}'`);
 
         if (this.onUpdateShadow) {
             await this.onUpdateShadow(reported);

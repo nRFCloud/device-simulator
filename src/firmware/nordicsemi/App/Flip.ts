@@ -1,4 +1,3 @@
-import logger from '../../../logger';
 import { ISensor } from '../../../sensors/Sensor';
 import { DemopackMessage } from '../GpsFlipModel';
 import { Sample } from '../../../sensors/FakeAccelerometer';
@@ -66,7 +65,7 @@ export default class implements App {
             case Orientation.UPSIDE_DOWN:
                 return 'UPSIDE_DOWN';
             default:
-                logger.error(`Unknown orientation`);
+                console.error(`Unknown orientation`);
                 return '';
         }
     }

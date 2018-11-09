@@ -1,4 +1,3 @@
-import logger from '../../logger';
 import { FirmwareError, FirmwareState, IFirmware, MessageStatus } from '../Firmware';
 import { IPairingEngine } from '../../pairing/PairingEngine';
 import { IHostConnection } from '../../connection/HostConnection';
@@ -42,13 +41,13 @@ export class GpsFlip implements IFirmware {
 
     private sendMessage: SendMessage = (timestamp, message) => {
         const timeStamp = new Date(timestamp).toISOString();
-        logger.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
-        logger.debug(`messageId not sent in message since firmware implementation does not have it.`);
+        console.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
+        console.debug(`messageId not sent in message since firmware implementation does not have it.`);
 
         this.state.messages.sent++;
 
         this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
-            logger.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
+            console.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
         });
     }
 
@@ -62,9 +61,9 @@ export class GpsFlip implements IFirmware {
                 }
 
                 this.applicationStarted = true;
-                logger.info(`Pairing done, application started.`);
+                console.info(`Pairing done, application started.`);
             } else {
-                logger.warn('Paired but application topics are NOT provided by nRF Cloud.');
+                console.warn('Paired but application topics are NOT provided by nRF Cloud.');
             }
         }
     }
@@ -82,7 +81,7 @@ export class GpsFlip implements IFirmware {
 
     private setupPairing() {
         this.pairingEngine.on('pairingUpdate', (state, status) => {
-            logger.debug(`gpsFlip; updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
+            console.debug(`gpsFlip; updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
             this.hostConnection.updateShadow({
                 pairing: state === null ? undefined : state,
                 pairingStatus: status,
@@ -108,7 +107,7 @@ export class GpsFlip implements IFirmware {
                 }
             } else {
                 // Some application specific state is desired, reply back as reported and process afterwards
-                logger.debug(`shadow; json data not related to pairing: ${JSON.stringify(delta)}`);
+                console.debug(`shadow; json data not related to pairing: ${JSON.stringify(delta)}`);
                 await this.hostConnection.updateShadow(<ShadowModelReported>delta);
             }
         });
@@ -122,15 +121,15 @@ export class GpsFlip implements IFirmware {
         this.setupPairing();
 
         this.hostConnection.on('reconnect', () => {
-            logger.info('Reconnecting to nRF Cloud.');
+            console.info('Reconnecting to nRF Cloud.');
         });
 
         this.hostConnection.on('connect', () => {
-            logger.info('Connected to nRF Cloud.');
+            console.info('Connected to nRF Cloud.');
         });
 
         this.hostConnection.on('disconnect', () => {
-            logger.info('Disconnected from nRF Cloud.');
+            console.info('Disconnected from nRF Cloud.');
         });
 
         this.apps = Array.from(this.sensors.entries()).map(([name, sensor]) => createApp(name, sensor, this.sendMessage));
@@ -138,7 +137,7 @@ export class GpsFlip implements IFirmware {
         this.hostConnection.on('message', (message: any) => {
             const demopackMessage = <DemopackMessage>Object.assign({}, message);
 
-            logger.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
+            console.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
         });
 
         await this.hostConnection.connect();

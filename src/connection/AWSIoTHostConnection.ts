@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import logger from '../logger';
 import { HostConnectionError, IHostConnection } from './HostConnection';
 import { ConfigurationData } from '../ConfigurationStorage';
 import { ShadowModel, ShadowModelDesired, ShadowModelReported } from '../ShadowModel';
@@ -44,7 +43,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
     }
 
     connect(): Promise<void> {
-        logger.debug(`Connecting to nRF Cloud stage ${this.config.stage}`);
+        console.debug(`Connecting to nRF Cloud stage ${this.config.stage}`);
 
         return new Promise<void>((resolveConnect, rejectConnect) => {
             const connectOptions: any = {
@@ -68,7 +67,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
             }
 
             this.mqtt.on('error', (error: any) => {
-                logger.error(`AWS IoT error ${error.message}`);
+                console.error(`AWS IoT error ${error.message}`);
 
                 // Do a guess if gateway has been deleted on the backend
                 if (this.mqtt
@@ -77,7 +76,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
                     && error.message.indexOf('alert certificate unknown') > -1
                     && error.message.indexOf('SSL alert number 46') > -1
                 ) {
-                    logger.error(`This device has its certificate revoked.`);
+                    console.error(`This device has its certificate revoked.`);
                 }
             });
 
@@ -121,7 +120,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
                         break;
                     case `${shadowBaseTopic}/update/delta`:
                         parsed = JSON.parse(payload);
-                        logger.debug(`delta received ${JSON.stringify(parsed.state)}`);
+                        console.debug(`delta received ${JSON.stringify(parsed.state)}`);
                         const delta: any = <ShadowModelDesired>Object.assign({}, parsed.state);
                         this.emit('shadowDelta', delta);
                         break;
@@ -171,7 +170,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
             throw new HostConnectionError('No MQTT client provided.');
         }
 
-        logger.debug(`Sending message: ${message}`);
+        console.debug(`Sending message: ${message}`);
         return new Promise<void>((resolve, reject) => {
             this.mqtt.publish(this.d2c, message, null, (error: any) => {
                 if (error) {
@@ -185,7 +184,7 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
 
     async setTopics(c2d: string, d2c: string): Promise<void> {
         if (this.c2d) {
-            logger.info(`Already subscribed to topic '${this.c2d}'.`);
+            console.info(`Already subscribed to topic '${this.c2d}'.`);
             return;
         }
 

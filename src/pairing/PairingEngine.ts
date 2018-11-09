@@ -3,7 +3,6 @@ import {
     IPairingMethod, State, PairingStatus, PairingTopics, StateInitiate, StatePatternWait,
     Pairing, PairingConfig, StateTimeout, StatePatternMismatch, StatePaired
 } from './Pairing';
-const logger = require('winston');
 
 export interface IPairingEngine {
     updatePairingState(pairing: Pairing): void;
@@ -56,7 +55,7 @@ export class PairingEngine extends EventEmitter implements IPairingEngine {
                         method: foundMethod.methodName
                     });
                 }).catch(error => {
-                    logger.error(`Error retrieving pattern ${error}.`);
+                    console.error(`Error retrieving pattern ${error}.`);
                 });
             }
         } else {
@@ -122,10 +121,6 @@ export class PairingEngine extends EventEmitter implements IPairingEngine {
         }
 
         const state = this.stateFactory(pairing);
-
-        if (previousState) {
-            logger.debug(`STATE: ${previousState.state} -> ${state.state}`);
-        }
 
         const localState = state.update(previousState);
 
