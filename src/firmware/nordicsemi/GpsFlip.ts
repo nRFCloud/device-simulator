@@ -5,7 +5,8 @@ import { ShadowModel, ShadowModelDesired, ShadowModelReported } from '../../Shad
 import { ISensor } from '../../sensors/Sensor';
 import { DemopackMessage } from './GpsFlipModel';
 import { Pairing } from '../../pairing/Pairing';
-import { App, createApp } from './App/App';
+import Service from './services/Service';
+import { createService } from "./services/createService";
 
 //
 // Simulate behaviour of Alta device:
@@ -20,7 +21,7 @@ export class GpsFlip implements IFirmware {
     private hostConnection: IHostConnection;
     private applicationStarted: boolean;
     private sensors: Map<string, ISensor>;
-    private apps: App[] = [];
+    private services: Service[] = [];
 
     constructor(
         pairingEngine: IPairingEngine,
@@ -56,8 +57,8 @@ export class GpsFlip implements IFirmware {
             if (pairing.topics && pairing.topics.d2c) {
                 await this.hostConnection.setTopics(pairing.topics.c2d, pairing.topics.d2c);
 
-                for (const app of this.apps) {
-                    await app.start();
+                for (const service of this.services) {
+                    await service.start();
                 }
 
                 this.applicationStarted = true;
@@ -71,8 +72,8 @@ export class GpsFlip implements IFirmware {
     private async stopApplication(): Promise<void> {
         if (this.applicationStarted) {
 
-            for (const app of this.apps) {
-                await app.stop();
+            for (const service of this.services) {
+                await service.stop();
             }
 
             this.applicationStarted = false;
@@ -132,7 +133,7 @@ export class GpsFlip implements IFirmware {
             console.info('Disconnected from nRF Cloud.');
         });
 
-        this.apps = Array.from(this.sensors.entries()).map(([name, sensor]) => createApp(name, sensor, this.sendMessage));
+        this.services = Array.from(this.sensors.entries()).map(([name, sensor]) => createService(name, sensor, this.sendMessage));
 
         this.hostConnection.on('message', (message: any) => {
             const demopackMessage = <DemopackMessage>Object.assign({}, message);

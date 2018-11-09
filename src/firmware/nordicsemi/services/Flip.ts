@@ -2,7 +2,7 @@ import { ISensor } from '../../../sensors/Sensor';
 import { DemopackMessage } from '../GpsFlipModel';
 import { Sample } from '../../../sensors/FakeAccelerometer';
 import { SendMessage } from '../GpsFlip';
-import { App } from './App';
+import Service from './Service';
 
 const APPID = 'FLIP';
 
@@ -21,7 +21,7 @@ const convertToInt8 = (data: Uint8Array): Int8Array => {
     return dest;
 };
 
-export default class implements App {
+export default class implements Service {
     private currentOrientation = Orientation.NORMAL;
     private orientationChange: boolean;
 
