@@ -28,7 +28,7 @@ const sensors = (nmea: string, acc: string, temp: string) => {
 
     if (nmea) { sensors.set('gps', new FakeGps(nmea, ['GPGGA'])); }
     if (acc) { sensors.set('acc', new FakeAccelerometer(acc, true, 1000)); }
-    if (temp) { sensors.set('temp', new FakeThermometer(temp, true, 2500)); }
+    if (temp) { sensors.set('temp', new FakeThermometer(temp, true, 7000)); }
 
     return sensors;
 };
