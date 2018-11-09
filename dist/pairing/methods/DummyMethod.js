@@ -14,11 +14,8 @@ class DummyMethod {
             return this.dummyPattern;
         });
     }
-    cancelRetrievePattern() {
-        return;
-    }
+    cancelRetrievePattern() { }
     constructor(dummyPattern) {
-        this.patternLength = dummyPattern.length;
         this.methodName = 'dummy';
         this.dummyPattern = dummyPattern;
     }

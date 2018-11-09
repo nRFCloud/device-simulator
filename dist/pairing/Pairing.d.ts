@@ -1,8 +1,7 @@
 export interface IPairingMethod {
     readonly methodName: string;
-    readonly patternLength: number;
     retrievePattern(length: number): Promise<Array<number>>;
-    cancelRetrievePattern(): Promise<void>;
+    cancelRetrievePattern(): Promise<void> | void;
 }
 export declare class Pairing {
     state?: string;
@@ -24,11 +23,7 @@ export declare abstract class State {
     constructor(state: string);
     abstract update(previous?: State): State;
     static STATE: {
-        initiate: string;
-        paired: string;
-        patternWait: string;
-        patternMismatch: string;
-        timeout: string;
+        [index: string]: string;
     };
 }
 export declare class StateInitiate extends State {

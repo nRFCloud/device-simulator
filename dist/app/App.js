@@ -8,31 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const logger_1 = require("../../logger");
-const Firmware_1 = require("../Firmware");
-const App_1 = require("./App/App");
-class GpsFlip {
+const createService_1 = require("./services/createService");
+class App {
     constructor(pairingEngine, hostConnection, sensors) {
-        this.apps = [];
+        this.services = [];
+        this.messagesSent = 0;
         this.sendMessage = (timestamp, message) => {
             const timeStamp = new Date(timestamp).toISOString();
-            logger_1.default.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
-            logger_1.default.debug(`messageId not sent in message since firmware implementation does not have it.`);
-            this.state.messages.sent++;
+            console.debug(`Timestamp in message #${this.messagesSent++}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
+            console.debug(`messageId not sent in message since firmware implementation does not have it.`);
             this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
-                logger_1.default.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
+                console.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
             });
         };
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
-        this.state = {
-            connects: 0,
-            connected: false,
-            messages: {
-                sent: 0,
-                received: 0,
-            },
-        };
+        this.applicationStarted = false;
         this.sensors = sensors;
     }
     startApplication(pairing) {
@@ -40,14 +31,14 @@ class GpsFlip {
             if (pairing.state === 'paired') {
                 if (pairing.topics && pairing.topics.d2c) {
                     yield this.hostConnection.setTopics(pairing.topics.c2d, pairing.topics.d2c);
-                    for (const app of this.apps) {
-                        yield app.start();
+                    for (const service of this.services) {
+                        yield service.start();
                     }
                     this.applicationStarted = true;
-                    logger_1.default.info(`Pairing done, application started.`);
+                    console.info(`Pairing done, application started.`);
                 }
                 else {
-                    logger_1.default.warn('Paired but application topics are NOT provided by nRF Cloud.');
+                    console.warn('Paired but application topics are NOT provided by nRF Cloud.');
                 }
             }
         });
@@ -55,8 +46,8 @@ class GpsFlip {
     stopApplication() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.applicationStarted) {
-                for (const app of this.apps) {
-                    yield app.stop();
+                for (const service of this.services) {
+                    yield service.stop();
                 }
                 this.applicationStarted = false;
             }
@@ -64,7 +55,7 @@ class GpsFlip {
     }
     setupPairing() {
         this.pairingEngine.on('pairingUpdate', (state, status) => {
-            logger_1.default.debug(`gpsFlip; updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
+            console.debug(`updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
             this.hostConnection.updateShadow({
                 pairing: state === null ? undefined : state,
                 pairingStatus: status,
@@ -88,7 +79,7 @@ class GpsFlip {
             }
             else {
                 // Some application specific state is desired, reply back as reported and process afterwards
-                logger_1.default.debug(`shadow; json data not related to pairing: ${JSON.stringify(delta)}`);
+                console.debug(`shadow; json data not related to pairing: ${JSON.stringify(delta)}`);
                 yield this.hostConnection.updateShadow(delta);
             }
         }));
@@ -96,28 +87,26 @@ class GpsFlip {
     main() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.sensors) {
-                throw new Firmware_1.FirmwareError('Sensors not provided. Required by GpsFlip.');
+                throw new Error('Sensors not provided. Required by app.');
             }
             this.setupPairing();
             this.hostConnection.on('reconnect', () => {
-                logger_1.default.info('Reconnecting to nRF Cloud.');
+                console.info('Reconnecting to nRF Cloud.');
             });
             this.hostConnection.on('connect', () => {
-                logger_1.default.info('Connected to nRF Cloud.');
+                console.info('Connected to nRF Cloud.');
             });
             this.hostConnection.on('disconnect', () => {
-                logger_1.default.info('Disconnected from nRF Cloud.');
+                console.info('Disconnected from nRF Cloud.');
             });
-            this.apps = Array.from(this.sensors.entries()).map(([name, sensor]) => App_1.createApp(name, sensor, this.sendMessage));
+            this.services = Array.from(this.sensors.entries()).map(([name, sensor]) => createService_1.createService(name, sensor, this.sendMessage));
             this.hostConnection.on('message', (message) => {
                 const demopackMessage = Object.assign({}, message);
-                logger_1.default.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
+                console.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
             });
             yield this.hostConnection.connect();
-            return new Promise(() => {
-            });
         });
     }
 }
-exports.GpsFlip = GpsFlip;
-//# sourceMappingURL=GpsFlip.js.map
+exports.default = App;
+//# sourceMappingURL=App.js.map

@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const Pairing_1 = require("./Pairing");
-const logger = require('winston');
 class PairingEngine extends events_1.EventEmitter {
     constructor(pairingMethods) {
         super();
@@ -19,9 +18,7 @@ class PairingEngine extends events_1.EventEmitter {
     cancelRetrievePattern() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.pairingMethods && this.selectedPairingMethod) {
-                const foundMethod = this.pairingMethods.find(method => {
-                    return method.methodName === this.selectedPairingMethod.methodName;
-                });
+                const foundMethod = this.pairingMethods.find(method => method.methodName === this.selectedPairingMethod.methodName);
                 if (!foundMethod) {
                     throw new Error(`Pairing method ${this.selectedPairingMethod.methodName} is not registered with the pairing engine.`);
                 }
@@ -47,7 +44,7 @@ class PairingEngine extends events_1.EventEmitter {
                         method: foundMethod.methodName
                     });
                 }).catch(error => {
-                    logger.error(`Error retrieving pattern ${error}.`);
+                    console.error(`Error retrieving pattern ${error}.`);
                 });
             }
         }
@@ -99,9 +96,6 @@ class PairingEngine extends events_1.EventEmitter {
             pairing.state = previousState.state;
         }
         const state = this.stateFactory(pairing);
-        if (previousState) {
-            logger.debug(`STATE: ${previousState.state} -> ${state.state}`);
-        }
         const localState = state.update(previousState);
         switch (localState.state) {
             case 'pattern_wait':

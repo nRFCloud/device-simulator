@@ -9,13 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
-const logger_1 = require("../logger");
 class FakeHostConnection extends events_1.EventEmitter {
-    constructor(onUpdateShadow, onSendMessage) {
-        super();
-        this.onUpdateShadow = onUpdateShadow;
-        this.onSendMessage = onSendMessage;
-    }
     connect() {
         this.emit('connect');
         this.emit('shadowDelta', {
@@ -23,35 +17,21 @@ class FakeHostConnection extends events_1.EventEmitter {
                 state: 'initiate'
             }
         });
-        return;
     }
     disconnect() {
         this.emit('disconnect');
-        return;
     }
     injectMessageToDevice(message) {
         this.emit('message', message);
     }
-    updateShadow(reported) {
-        return __awaiter(this, void 0, void 0, function* () {
-            logger_1.default.debug(`Fake: Updating shadow.reported on host '${JSON.stringify(reported)}'`);
-            if (this.onUpdateShadow) {
-                yield this.onUpdateShadow(reported);
-            }
-        });
+    updateShadow(_reported) {
+        return __awaiter(this, void 0, void 0, function* () { });
     }
-    sendMessage(message) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.onSendMessage) {
-                yield this.onSendMessage(this.d2c, message);
-            }
-            return;
-        });
+    sendMessage(_message) {
+        return __awaiter(this, void 0, void 0, function* () { });
     }
-    setTopics(_c2d, d2c) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.d2c = d2c;
-        });
+    setTopics(_c2d, _d2c) {
+        return __awaiter(this, void 0, void 0, function* () { });
     }
 }
 exports.FakeHostConnection = FakeHostConnection;

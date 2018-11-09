@@ -58,7 +58,7 @@ class StatePaired extends State {
     update(previous) {
         if (previous && previous.state === State.STATE.paired && (previous instanceof StatePaired)) {
             return new StatePaired(previous.topics ?
-                new PairingTopics(this.topics.c2d ? this.topics.c2d : previous.topics.c2d, this.topics.d2c ? this.topics.d2c : previous.topics.d2c) : undefined);
+                new PairingTopics(this.topics && this.topics.c2d ? this.topics.c2d : previous.topics.c2d, this.topics && this.topics.d2c ? this.topics.d2c : previous.topics.d2c) : undefined);
         }
         else {
             return StatePaired.copy(this);

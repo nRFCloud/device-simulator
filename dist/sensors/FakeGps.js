@@ -17,6 +17,7 @@ class FakeGps extends events_1.EventEmitter {
         this.nmeaRecording = nmeaRecording;
         this.sentenceFilter = sentenceFilter;
         this.nmeaSeconds = {};
+        this.started = false;
     }
     setupNmeaReader() {
         this.readStream = fs.createReadStream(this.nmeaRecording);
@@ -97,7 +98,6 @@ class FakeGps extends events_1.EventEmitter {
     }
     stop() {
         this.cleanUp();
-        return;
     }
     isStarted() {
         return this.started;

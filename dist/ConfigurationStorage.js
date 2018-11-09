@@ -15,8 +15,7 @@ class FileConfigurationStorage {
     }
     ensureConfigFileExists() {
         return __awaiter(this, void 0, void 0, function* () {
-            const exists = yield new Promise((resolve) => fs.exists(this.configFilename, resolve));
-            if (!exists) {
+            if (!fs.existsSync(this.configFilename)) {
                 const fd = (yield new Promise((resolve) => fs.open(this.configFilename, 'w', resolve)));
                 yield new Promise((resolve) => fs.write(fd, '{}', resolve));
                 yield new Promise((resolve) => fs.close(fd, resolve));
@@ -25,8 +24,7 @@ class FileConfigurationStorage {
     }
     getConfiguration() {
         return __awaiter(this, void 0, void 0, function* () {
-            const exists = yield new Promise((resolve) => fs.exists(this.configFilename, resolve));
-            if (!exists) {
+            if (!fs.existsSync(this.configFilename)) {
                 throw new Error(`Configuration file '${this.configFilename}' does not exist.`);
             }
             const configFileContent = (yield new Promise((resolve, reject) => fs.readFile(this.configFilename, 'utf8', (error, data) => {

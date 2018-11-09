@@ -9,12 +9,12 @@ export interface IPairingEngine {
 }
 export declare class PairingEngine extends EventEmitter implements IPairingEngine {
     readonly pairingMethods: Array<IPairingMethod>;
-    private previousPairing;
-    private selectedPairingMethod;
+    private previousPairing?;
+    private selectedPairingMethod?;
     constructor(pairingMethods: Array<IPairingMethod>);
-    private cancelRetrievePattern();
-    private stateWaitingForPattern(state);
-    private stateFactory(pairing);
-    private emitShadowUpdate(pairing);
+    private cancelRetrievePattern;
+    private stateWaitingForPattern;
+    private stateFactory;
+    private emitShadowUpdate;
     updatePairingState(pairing: Pairing): void;
 }

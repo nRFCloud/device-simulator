@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
-const logger_1 = require("../logger");
 const HostConnection_1 = require("./HostConnection");
 const awsIot = require("aws-iot-device-sdk");
 class AWSIoTHostConnection extends events_1.EventEmitter {
@@ -29,7 +28,7 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
                 }
             };
             return new Promise((resolve, reject) => {
-                this.mqtt.publish(`${this.getShadowBaseTopic()}/update`, JSON.stringify(root), null, error => {
+                this.mqtt.publish(`${this.getShadowBaseTopic()}/update`, JSON.stringify(root), undefined, (error) => {
                     if (error) {
                         reject(error);
                     }
@@ -41,7 +40,7 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
         });
     }
     connect() {
-        logger_1.default.debug(`Connecting to nRF Cloud stage ${this.config.stage}`);
+        console.debug(`Connecting to nRF Cloud stage ${this.config.stage}`);
         return new Promise((resolveConnect, rejectConnect) => {
             const connectOptions = {
                 privateKey: Buffer.from(this.config.privateKey, 'utf8'),
@@ -61,14 +60,14 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
                 rejectConnect(error);
             }
             this.mqtt.on('error', (error) => {
-                logger_1.default.error(`AWS IoT error ${error.message}`);
+                console.error(`AWS IoT error ${error.message}`);
                 // Do a guess if gateway has been deleted on the backend
                 if (this.mqtt
                     && error
                     && error.code === 'EPROTO'
                     && error.message.indexOf('alert certificate unknown') > -1
                     && error.message.indexOf('SSL alert number 46') > -1) {
-                    logger_1.default.error(`This device has its certificate revoked.`);
+                    console.error(`This device has its certificate revoked.`);
                 }
             });
             this.mqtt.on('connect', () => {
@@ -102,7 +101,7 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
                         break;
                     case `${shadowBaseTopic}/update/delta`:
                         parsed = JSON.parse(payload);
-                        logger_1.default.debug(`delta received ${JSON.stringify(parsed.state)}`);
+                        console.debug(`delta received ${JSON.stringify(parsed.state)}`);
                         const delta = Object.assign({}, parsed.state);
                         this.emit('shadowDelta', delta);
                         break;
@@ -122,7 +121,7 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
             this.mqtt.unsubscribe(`${shadowBaseTopic}/get`);
             yield new Promise((resolve, reject) => {
                 if (this.c2d) {
-                    this.mqtt.unsubscribe(this.c2d, null, (error) => {
+                    this.mqtt.unsubscribe(this.c2d, undefined, (error) => {
                         if (error) {
                             reject(error);
                         }
@@ -141,7 +140,6 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.unsubscribeFromAll();
             this.mqtt.end(true);
-            return;
         });
     }
     sendMessage(message) {
@@ -152,9 +150,9 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
             if (!this.mqtt) {
                 throw new HostConnection_1.HostConnectionError('No MQTT client provided.');
             }
-            logger_1.default.debug(`Sending message: ${message}`);
+            console.debug(`Sending message: ${message}`);
             return new Promise((resolve, reject) => {
-                this.mqtt.publish(this.d2c, message, null, (error) => {
+                this.mqtt.publish(this.d2c, message, undefined, (error) => {
                     if (error) {
                         reject(error);
                     }
@@ -168,13 +166,13 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
     setTopics(c2d, d2c) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.c2d) {
-                logger_1.default.info(`Already subscribed to topic '${this.c2d}'.`);
+                console.info(`Already subscribed to topic '${this.c2d}'.`);
                 return;
             }
             this.c2d = c2d;
             this.d2c = d2c;
             return new Promise((resolve, reject) => {
-                this.mqtt.subscribe(c2d, null, error => {
+                this.mqtt.subscribe(c2d, undefined, (error) => {
                     if (error) {
                         reject(error);
                     }

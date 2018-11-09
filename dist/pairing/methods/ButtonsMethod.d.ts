@@ -1,14 +1,11 @@
 /// <reference types="node" />
 import { IPairingMethod } from '../Pairing';
 export declare class SwitchesMethod implements IPairingMethod {
+    private readonly numberOfButtons;
     methodName: string;
-    patternLength: number;
-    numberOfButtons: number;
-    pattern: Buffer;
-    idx: number;
     rejectRetrievePattern: any;
-    addKeypress(key: string): void;
+    constructor(numberOfButtons: number);
+    addKeypress(key: string, pattern: Buffer, idx: number): void;
     retrievePattern(patternLength: number): Promise<Array<number>>;
     cancelRetrievePattern(): Promise<void>;
-    constructor(numberOfButtons: number);
 }

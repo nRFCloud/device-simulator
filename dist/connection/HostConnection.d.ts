@@ -5,8 +5,8 @@ export declare class HostConnectionError extends Error {
     constructor(message: string);
 }
 export interface IHostConnection extends EventEmitter {
-    connect(): Promise<void>;
-    disconnect(): Promise<void>;
+    connect(): Promise<void> | void;
+    disconnect(): Promise<void> | void;
     updateShadow(reported: ShadowModelReported): Promise<void>;
     sendMessage(message: any): Promise<void>;
     setTopics(c2d: string, d2c: string): Promise<void>;

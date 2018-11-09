@@ -15,7 +15,7 @@ export interface IConfigurationStorage {
     setConfiguration(configuration: ConfigurationData): Promise<void>;
 }
 export declare class FileConfigurationStorage implements IConfigurationStorage {
-    private configFilename;
+    readonly configFilename: string;
     constructor(configFilename: string);
     ensureConfigFileExists(): Promise<void>;
     getConfiguration(): Promise<ConfigurationData>;

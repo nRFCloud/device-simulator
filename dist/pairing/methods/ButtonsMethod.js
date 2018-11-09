@@ -9,43 +9,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const readline = require("readline");
+const setTerminalToRawMode = (mode) => {
+    if (process.stdin.isTTY) {
+        process.stdin.setRawMode(mode);
+    }
+};
+const startReadingKeypresses = (keyPressListener) => {
+    setTerminalToRawMode(true);
+    process.stdin.resume();
+    process.stdin.on('keypress', keyPressListener);
+};
+const stopReadingKeypresses = () => {
+    process.stdin.pause();
+    setTerminalToRawMode(false);
+    process.stdin.removeAllListeners('keypress');
+};
 class SwitchesMethod {
-    addKeypress(key) {
+    constructor(numberOfButtons) {
+        this.numberOfButtons = numberOfButtons;
+        this.methodName = 'buttons';
+    }
+    addKeypress(key, pattern, idx) {
         const keyId = key.charCodeAt(0) - '0'.charCodeAt(0);
         if (!(keyId > 0 && keyId <= this.numberOfButtons)) {
             return;
         }
-        const pos = Math.floor(this.idx / 2);
-        const prev = this.pattern.readUInt8(pos);
-        const value = keyId | (prev << ((this.idx % 2) * 4));
-        this.pattern.writeUInt8(value, pos);
-        this.idx++;
+        const pos = Math.floor(idx / 2);
+        const prev = pattern.readUInt8(pos);
+        const value = keyId | (prev << ((idx % 2) * 4));
+        pattern.writeUInt8(value, pos);
     }
     retrievePattern(patternLength) {
-        this.patternLength = patternLength;
-        console.log(`Press buttons 1-${this.numberOfButtons} ${this.patternLength} times.`);
+        patternLength = patternLength;
+        console.log(`Press buttons 1-${this.numberOfButtons} ${patternLength} times.`);
         return new Promise(resolve => {
             readline.emitKeypressEvents(process.stdin);
-            if (process.stdin.isTTY) {
-                process.stdin.setRawMode(true);
-            }
-            this.idx = 0;
-            this.pattern = Buffer.alloc(this.patternLength / 2 + (this.patternLength % 2));
-            const keyPressListener = (str) => {
-                this.addKeypress(str);
-                if (this.idx >= this.patternLength) {
-                    console.log(`Pattern recorded. Pattern is (hex): ${this.pattern.toString('hex')}`);
-                    process.stdin.pause();
-                    if (process.stdin.isTTY) {
-                        process.stdin.setRawMode(false);
-                    }
+            let idx = 0;
+            const pattern = Buffer.alloc(patternLength / 2 + (patternLength % 2));
+            startReadingKeypresses((key) => {
+                this.addKeypress(key, pattern, idx);
+                idx++;
+                if (idx >= patternLength) {
+                    console.log(`Pattern recorded. Pattern is (hex): ${pattern.toString('hex')}`);
                     this.rejectRetrievePattern = null;
-                    process.stdin.removeAllListeners('keypress');
-                    resolve(Array.prototype.slice.call(this.pattern, 0));
+                    stopReadingKeypresses();
+                    resolve(Array.prototype.slice.call(pattern, 0));
                 }
-            };
-            process.stdin.resume();
-            process.stdin.on('keypress', keyPressListener);
+            });
         });
     }
     cancelRetrievePattern() {
@@ -53,16 +63,8 @@ class SwitchesMethod {
             if (this.rejectRetrievePattern) {
                 this.rejectRetrievePattern('Canceled retrieval of pattern');
             }
-            process.stdin.pause();
-            if (process.stdin.isTTY) {
-                process.stdin.setRawMode(false);
-            }
-            process.stdin.removeAllListeners('keypress');
+            stopReadingKeypresses();
         });
-    }
-    constructor(numberOfButtons) {
-        this.numberOfButtons = numberOfButtons;
-        this.methodName = 'buttons';
     }
 }
 exports.SwitchesMethod = SwitchesMethod;
