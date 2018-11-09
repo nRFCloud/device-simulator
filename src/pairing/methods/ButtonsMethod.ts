@@ -23,8 +23,7 @@ export class SwitchesMethod implements IPairingMethod {
     methodName = 'buttons';
     rejectRetrievePattern: any;
 
-    constructor(private readonly numberOfButtons: number) {
-    }
+    constructor(private readonly numberOfButtons: number) { }
 
     addKeypress(key: string, pattern: Buffer, idx: number) {
         const keyId = key.charCodeAt(0) - '0'.charCodeAt(0);

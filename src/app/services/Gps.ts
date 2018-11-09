@@ -1,6 +1,6 @@
-import { ISensor } from '../../../sensors/Sensor';
-import { DemopackMessage } from '../GpsFlipModel';
-import { SendMessage } from '../GpsFlip';
+import { ISensor } from '../../sensors/Sensor';
+import { AppMessage } from '../AppModel';
+import { SendMessage } from '../App';
 import Service from './Service';
 
 const APPID = 'GPS';
@@ -16,7 +16,7 @@ export default class implements Service {
 
         this.sensor.on('data', (timestamp: number, data) => {
             if (Date.now() >= this.lastGpsSend + GPS_SEND_INTERVAL) {
-                const message = <DemopackMessage>{
+                const message = <AppMessage>{
                     appId: APPID,
                     messageType: 'DATA',
                     data: String.fromCharCode.apply(null, data)

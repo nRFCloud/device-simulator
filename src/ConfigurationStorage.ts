@@ -19,15 +19,10 @@ export interface IConfigurationStorage {
 }
 
 export class FileConfigurationStorage implements IConfigurationStorage {
-    private configFilename: string;
-
-    constructor(configFilename: string) {
-        this.configFilename = configFilename;
-    }
+    constructor(readonly configFilename: string) { }
 
     async ensureConfigFileExists() {
-        const exists = await new Promise((resolve) => fs.exists(this.configFilename, resolve));
-        if (!exists) {
+        if (!fs.existsSync(this.configFilename)) {
             const fd = (await new Promise((resolve) => fs.open(this.configFilename, 'w', resolve))) as number;
             await new Promise((resolve) => fs.write(fd, '{}', resolve));
             await new Promise((resolve) => fs.close(fd, resolve));
@@ -35,9 +30,7 @@ export class FileConfigurationStorage implements IConfigurationStorage {
     }
 
     async getConfiguration(): Promise<ConfigurationData> {
-        const exists = await new Promise((resolve) => fs.exists(this.configFilename, resolve));
-
-        if (!exists) {
+        if (!fs.existsSync(this.configFilename)) {
             throw new Error(`Configuration file '${this.configFilename}' does not exist.`);
         }
 

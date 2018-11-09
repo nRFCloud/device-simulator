@@ -12,7 +12,7 @@
     "compile:ts": "tsc",
     "lint": "tslint --project ./tsconfig.json",
     "test": "jest",
-    "schemas2ts": "./node_modules/json-schema-to-typescript/dist/src/cli.js schemas/nordicsemi/gpsflip.schema.json src/firmware/nordicsemi/GpsFlipModel.ts"
+    "schemas2ts": "./node_modules/json-schema-to-typescript/dist/src/cli.js schemas/app.schema.json src/app/AppModel.ts"
   },
   "repository": {
     "type": "git",

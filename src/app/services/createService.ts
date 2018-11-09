@@ -1,5 +1,5 @@
-import { ISensor } from "../../../sensors/Sensor";
-import { SendMessage } from "../GpsFlip";
+import { ISensor } from "../../sensors/Sensor";
+import { SendMessage } from "../App";
 import Service from "./Service";
 import Gps from "./Gps";
 import Temp from "./Temp";

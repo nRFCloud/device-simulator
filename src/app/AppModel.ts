@@ -5,9 +5,9 @@
  */
 
 /**
- * Message format for Alta Demopack 1 GPS/FLIP App
+ * Message format for simulator app
  */
-export interface DemopackMessage {
+export interface AppMessage {
   appId: "GPS" | "FLIP" | "TEMP";
   messageType: "HELLO" | "START" | "STOP" | "INT" | "GET" | "STATUS" | "DATA" | "OK" | "EVENT";
   /**

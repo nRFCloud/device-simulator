@@ -1,27 +1,21 @@
-import { FirmwareError, FirmwareState, IFirmware, MessageStatus } from '../Firmware';
-import { IPairingEngine } from '../../pairing/PairingEngine';
-import { IHostConnection } from '../../connection/HostConnection';
-import { ShadowModel, ShadowModelDesired, ShadowModelReported } from '../../ShadowModel';
-import { ISensor } from '../../sensors/Sensor';
-import { DemopackMessage } from './GpsFlipModel';
-import { Pairing } from '../../pairing/Pairing';
+import { IPairingEngine } from '../pairing/PairingEngine';
+import { IHostConnection } from '../connection/HostConnection';
+import { ShadowModel, ShadowModelDesired, ShadowModelReported } from '../ShadowModel';
+import { ISensor } from '../sensors/Sensor';
+import { AppMessage } from './AppModel';
+import { Pairing } from '../pairing/Pairing';
 import Service from './services/Service';
 import { createService } from "./services/createService";
 
-//
-// Simulate behaviour of Alta device:
-//   https://projecttools.nordicsemi.no/jira/browse/IS-1130
-//
+export type SendMessage = (timestamp: number, message: AppMessage) => void;
 
-export type SendMessage = (timestamp: number, message: DemopackMessage) => void;
-
-export class GpsFlip implements IFirmware {
+export default class App {
     private pairingEngine: IPairingEngine;
-    private state: FirmwareState;
     private hostConnection: IHostConnection;
     private applicationStarted: boolean;
     private sensors: Map<string, ISensor>;
     private services: Service[] = [];
+    private messagesSent = 0;
 
     constructor(
         pairingEngine: IPairingEngine,
@@ -29,24 +23,14 @@ export class GpsFlip implements IFirmware {
         sensors: Map<string, ISensor>) {
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
-        this.state = <FirmwareState>{
-            connects: 0,
-            connected: false,
-            messages: <MessageStatus>{
-                sent: 0,
-                received: 0,
-            },
-        };
         this.applicationStarted = false;
         this.sensors = sensors;
     }
 
     private sendMessage: SendMessage = (timestamp, message) => {
         const timeStamp = new Date(timestamp).toISOString();
-        console.debug(`Timestamp in message #${this.state.messages.sent}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
+        console.debug(`Timestamp in message #${this.messagesSent++}, ${timeStamp} removed from message, since firmware implementation does not support it yet.`);
         console.debug(`messageId not sent in message since firmware implementation does not have it.`);
-
-        this.state.messages.sent++;
 
         this.hostConnection.sendMessage(JSON.stringify(message)).catch(error => {
             console.error(`Error sending sensor data to nRF Cloud. Error is ${error.message}.`);
@@ -82,7 +66,7 @@ export class GpsFlip implements IFirmware {
 
     private setupPairing() {
         this.pairingEngine.on('pairingUpdate', (state, status) => {
-            console.debug(`gpsFlip; updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
+            console.debug(`updating shadow -> reported.pairing: ${JSON.stringify(state)} status: ${JSON.stringify(status)}`);
             this.hostConnection.updateShadow({
                 pairing: state === null ? undefined : state,
                 pairingStatus: status,
@@ -114,9 +98,9 @@ export class GpsFlip implements IFirmware {
         });
     }
 
-    async main(): Promise<number> {
+    async main() {
         if (!this.sensors) {
-            throw new FirmwareError('Sensors not provided. Required by GpsFlip.');
+            throw new Error('Sensors not provided. Required by app.');
         }
 
         this.setupPairing();
@@ -136,14 +120,11 @@ export class GpsFlip implements IFirmware {
         this.services = Array.from(this.sensors.entries()).map(([name, sensor]) => createService(name, sensor, this.sendMessage));
 
         this.hostConnection.on('message', (message: any) => {
-            const demopackMessage = <DemopackMessage>Object.assign({}, message);
+            const demopackMessage = <AppMessage>Object.assign({}, message);
 
             console.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);
         });
 
         await this.hostConnection.connect();
-
-        return new Promise<number>(() => {
-        });
     }
 }

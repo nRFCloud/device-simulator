@@ -1,19 +1,18 @@
 import * as os from 'os';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as program from 'commander';
 import { red } from 'colors';
 
 import { FileConfigurationStorage } from './ConfigurationStorage';
 import { PairingEngine } from './pairing/PairingEngine';
 import { DummyMethod } from './pairing/methods/DummyMethod';
-import { FirmwareDirectory } from './firmware/FirmwareDirectory';
 import { ISensor } from './sensors/Sensor';
 import { FakeGps } from './sensors/FakeGps';
 import { AWSIoTHostConnection } from './connection/AWSIoTHostConnection';
 import { SwitchesMethod } from './pairing/methods/ButtonsMethod';
 import { FakeAccelerometer } from './sensors/FakeAccelerometer';
 import FakeThermometer from './sensors/FakeThermometer';
+import App from './app/App';
 
 let ran = false;
 
@@ -21,74 +20,49 @@ process.on('unhandledRejection', function (reason, p) {
     console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
 });
 
-async function startSimulation(configFilename: string, firmwareNsrn: string, options: any): Promise<number> {
-    if (configFilename == null) {
-        configFilename = path.join(os.homedir(), '.nrfcloud', 'simulator_config.json');
-    }
+const pairingMethods = [
+    new DummyMethod([1, 2, 3, 4, 5, 6]),
+    new SwitchesMethod(4)
+];
 
-    const exists = await new Promise<boolean>((resolve) => fs.exists(path.resolve(configFilename), resolve));
+const sensors = (nmea: string, acc: string, temp: string) => {
+    const sensors = new Map<string, ISensor>();
 
-    if (!exists) {
-        throw `Configuration file '${configFilename}' not found.`;
-    }
+    if (nmea) { sensors.set('gps', new FakeGps(nmea, ['GPGGA'])); }
+    if (acc) { sensors.set('acc', new FakeAccelerometer(acc, true, 1000)); }
+    if (temp) { sensors.set('temp', new FakeThermometer(temp, true, 2500)); }
 
-    const configurationStorage = new FileConfigurationStorage(configFilename);
-    const config = await configurationStorage.getConfiguration();
+    return sensors;
+};
 
-    const pairingMethods = [
-        new DummyMethod([1, 2, 3, 4, 5, 6]),
-        new SwitchesMethod(4)
-    ];
+const defaultConfig = path.join(os.homedir(), '.nrfcloud', 'simulator_config.json');
 
-    const pairingEngine = new PairingEngine(pairingMethods);
+async function startSimulation({config = defaultConfig, nmea, acc, temp}: program.Command) {
+    const configurationStorage = new FileConfigurationStorage(config);
+    const configuration = await configurationStorage.getConfiguration();
 
-    const hostConnection = new AWSIoTHostConnection(config);
-
-    const sensors: Map<string, ISensor> = new Map<string, ISensor>();
-
-    if (options && options.nmea) {
-        sensors.set('gps', new FakeGps(options.nmea, ['GPGGA']));
-    }
-
-    if (options && options.acc) {
-        sensors.set('acc', new FakeAccelerometer(options.acc, true, 1000));
-    }
-
-    if (options && options.temp) {
-        sensors.set('temp', new FakeThermometer(options.temp, true, 2500));
-    }
-
-    const firmwareDirectory = new FirmwareDirectory(
-        pairingEngine,
-        hostConnection,
-        sensors);
-
-    firmwareDirectory.create();
-
-    const firmware = firmwareDirectory.getFirmware(firmwareNsrn);
-    return firmware!.main();
+    const app = new App(
+        new PairingEngine(pairingMethods),
+        new AWSIoTHostConnection(configuration),
+        sensors(nmea, acc, temp));
+    app.main();
 }
 
 program
-.command('start <firmware>')
-.option('-c, --config [config]', 'Configuration file containing credentials.')
-.option('-n, --nmea [nmea]', 'File containing NMEA sentences.')
-.option('-a, --acc [acc]', 'File containing accelerometer recordings.')
-.option('-t, --temp [temp]', 'File containing temperature recordings.')
-.action((cmd: any, env: any) => {
-    ran = true;
-    const { nmea, acc, temp } = env;
+    .command('start')
+    .option('-c, --config [config]', 'Configuration file containing credentials.')
+    .option('-n, --nmea [nmea]', 'File containing NMEA sentences.')
+    .option('-a, --acc [acc]', 'File containing accelerometer recordings.')
+    .option('-t, --temp [temp]', 'File containing temperature recordings.')
+    .action((command: program.Command) => {
+        ran = true;
 
-    startSimulation(env['config'], cmd, {
-        nmea,
-        acc,
-        temp
-    }).then(retval => {
-        console.log(`Simulator stopped with return value ${retval}.`);
-    }).catch(error => {
-        process.stderr.write(`${red(error)}\n`);
+        startSimulation(command).then(retval => {
+            console.log(`Simulator stopped with return value ${retval}.`);
+        }).catch(error => {
+            process.stderr.write(`${red(error)}\n`);
+        });
     });
-});
 
 program.parse(process.argv);
 

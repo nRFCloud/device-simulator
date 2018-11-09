@@ -1,7 +1,7 @@
-import { ISensor } from '../../../sensors/Sensor';
-import { DemopackMessage } from '../GpsFlipModel';
-import { Sample } from '../../../sensors/FakeAccelerometer';
-import { SendMessage } from '../GpsFlip';
+import { ISensor } from '../../sensors/Sensor';
+import { Sample } from '../../sensors/FakeAccelerometer';
+import { AppMessage } from '../AppModel';
+import { SendMessage } from '../App';
 import Service from './Service';
 
 const APPID = 'FLIP';
@@ -35,7 +35,7 @@ export default class implements Service {
             this.updateOrientation(sample);
             if (this.orientationChange) {
                 this.orientationChange = false;
-                const message = <DemopackMessage>{
+                const message = <AppMessage>{
                     appId: APPID,
                     messageType: 'DATA',
                     data: this.orientation

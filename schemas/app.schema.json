@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "demopackMessage",
-    "description": "Message format for Alta Demopack 1 GPS/FLIP App",
+    "title": "appMessage",
+    "description": "Message format for simulator app",
     "type": "object",
     "required": [
         "appId",

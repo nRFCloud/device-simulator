@@ -1,6 +1,6 @@
-import { ISensor } from '../../../sensors/Sensor';
-import { DemopackMessage } from '../GpsFlipModel';
-import { SendMessage } from '../GpsFlip';
+import { ISensor } from '../../sensors/Sensor';
+import { AppMessage } from '../AppModel';
+import { SendMessage } from '../App';
 import Service from './Service';
 
 const APPID = 'TEMP';
@@ -12,7 +12,7 @@ export default class implements Service {
         await this.sendHello();
 
         this.sensor.on('data', (timestamp: number, data) => {
-            const message = <DemopackMessage>{
+            const message = <AppMessage>{
                 appId: APPID,
                 messageType: 'DATA',
                 data: String.fromCharCode.apply(null, data)
