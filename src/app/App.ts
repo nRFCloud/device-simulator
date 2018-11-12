@@ -13,8 +13,7 @@ export default class App {
     private pairingEngine: IPairingEngine;
     private hostConnection: IHostConnection;
     private applicationStarted: boolean;
-    private sensors: Map<string, ISensor>;
-    private services: Service[] = [];
+    private services: Service[];
     private messagesSent = 0;
 
     constructor(
@@ -24,7 +23,10 @@ export default class App {
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.applicationStarted = false;
-        this.sensors = sensors;
+
+        this.services = Array.from(sensors.entries()).map((
+            [name, sensor]) => createService(name, sensor, this.sendMessage)
+        );
     }
 
     private sendMessage: SendMessage = (timestamp, message) => {
@@ -99,10 +101,6 @@ export default class App {
     }
 
     async main() {
-        if (!this.sensors) {
-            throw new Error('Sensors not provided. Required by app.');
-        }
-
         this.setupPairing();
 
         this.hostConnection.on('reconnect', () => {
@@ -116,8 +114,6 @@ export default class App {
         this.hostConnection.on('disconnect', () => {
             console.info('Disconnected from nRF Cloud.');
         });
-
-        this.services = Array.from(this.sensors.entries()).map(([name, sensor]) => createService(name, sensor, this.sendMessage));
 
         this.hostConnection.on('message', (message: any) => {
             const demopackMessage = <AppMessage>Object.assign({}, message);
