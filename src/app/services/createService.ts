@@ -15,5 +15,12 @@ const services: ServiceConstructors = {
     temp: Temp,
 };
 
-export const createService = (name: string, sensor: ISensor, sendMessage: SendMessage) =>
-    new (services[name])(sensor, sendMessage);
+export const createService = (name: string, sensor: ISensor, sendMessage: SendMessage) => {
+    const Service = services[name];
+    if (Service == null) {
+        throw new Error(`No service for a sensor named '${name}' is known.`);
+    }
+
+    return new Service(sensor, sendMessage);
+};
+
