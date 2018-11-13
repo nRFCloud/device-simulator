@@ -10,7 +10,6 @@ export interface ConfigurationData {
     deviceType: string;
     brokerHostname: string;
     region: string;
-    stage: string;
 }
 
 export interface IConfigurationStorage {

@@ -43,8 +43,6 @@ export class AWSIoTHostConnection extends EventEmitter implements IHostConnectio
     }
 
     connect(): Promise<void> {
-        console.debug(`Connecting to nRF Cloud stage ${this.config.stage}`);
-
         return new Promise<void>((resolveConnect, rejectConnect) => {
             const connectOptions: any = {
                 privateKey: Buffer.from(this.config.privateKey, 'utf8'),
