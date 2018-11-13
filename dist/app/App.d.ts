@@ -7,7 +7,6 @@ export default class App {
     private pairingEngine;
     private hostConnection;
     private applicationStarted;
-    private sensors;
     private services;
     private messagesSent;
     constructor(pairingEngine: IPairingEngine, hostConnection: IHostConnection, sensors: Map<string, ISensor>);

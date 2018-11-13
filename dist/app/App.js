@@ -11,7 +11,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const createService_1 = require("./services/createService");
 class App {
     constructor(pairingEngine, hostConnection, sensors) {
-        this.services = [];
         this.messagesSent = 0;
         this.sendMessage = (timestamp, message) => {
             const timeStamp = new Date(timestamp).toISOString();
@@ -24,7 +23,7 @@ class App {
         this.pairingEngine = pairingEngine;
         this.hostConnection = hostConnection;
         this.applicationStarted = false;
-        this.sensors = sensors;
+        this.services = Array.from(sensors.entries()).map(([name, sensor]) => createService_1.createService(name, sensor, this.sendMessage));
     }
     startApplication(pairing) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -86,9 +85,6 @@ class App {
     }
     main() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.sensors) {
-                throw new Error('Sensors not provided. Required by app.');
-            }
             this.setupPairing();
             this.hostConnection.on('reconnect', () => {
                 console.info('Reconnecting to nRF Cloud.');
@@ -99,7 +95,6 @@ class App {
             this.hostConnection.on('disconnect', () => {
                 console.info('Disconnected from nRF Cloud.');
             });
-            this.services = Array.from(this.sensors.entries()).map(([name, sensor]) => createService_1.createService(name, sensor, this.sendMessage));
             this.hostConnection.on('message', (message) => {
                 const demopackMessage = Object.assign({}, message);
                 console.info(`Received message (ignoring it) ${JSON.stringify(demopackMessage)}`);

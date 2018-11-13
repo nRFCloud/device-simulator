@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const HostConnection_1 = require("./HostConnection");
-const awsIot = require("aws-iot-device-sdk");
+const aws_iot_device_sdk_1 = require("aws-iot-device-sdk");
 class AWSIoTHostConnection extends events_1.EventEmitter {
     constructor(config) {
         super();
@@ -40,7 +40,6 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
         });
     }
     connect() {
-        console.debug(`Connecting to nRF Cloud stage ${this.config.stage}`);
         return new Promise((resolveConnect, rejectConnect) => {
             const connectOptions = {
                 privateKey: Buffer.from(this.config.privateKey, 'utf8'),
@@ -52,7 +51,7 @@ class AWSIoTHostConnection extends events_1.EventEmitter {
                 debug: false
             };
             try {
-                this.mqtt = new awsIot.device(connectOptions);
+                this.mqtt = new aws_iot_device_sdk_1.device(connectOptions);
                 const shadowBaseTopic = this.getShadowBaseTopic();
                 this.mqtt.subscribe(`${shadowBaseTopic}/get/accepted`);
             }

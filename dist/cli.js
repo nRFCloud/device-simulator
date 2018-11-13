@@ -8,11 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const os = require("os");
-const path = require("path");
 const program = require("commander");
 const colors_1 = require("colors");
-const ConfigurationStorage_1 = require("./ConfigurationStorage");
+const Configuration_1 = require("./Configuration");
 const PairingEngine_1 = require("./pairing/PairingEngine");
 const DummyMethod_1 = require("./pairing/methods/DummyMethod");
 const FakeGps_1 = require("./sensors/FakeGps");
@@ -41,11 +39,9 @@ const sensors = (nmea, acc, temp) => {
     }
     return sensors;
 };
-const defaultConfig = path.join(os.homedir(), '.nrfcloud', 'simulator_config.json');
-function startSimulation({ config = defaultConfig, nmea, acc, temp }) {
+function startSimulation({ config, nmea, acc, temp }) {
     return __awaiter(this, void 0, void 0, function* () {
-        const configurationStorage = new ConfigurationStorage_1.FileConfigurationStorage(config);
-        const configuration = yield configurationStorage.getConfiguration();
+        const configuration = Configuration_1.readConfiguration(config);
         const app = new App_1.default(new PairingEngine_1.PairingEngine(pairingMethods), new AWSIoTHostConnection_1.AWSIoTHostConnection(configuration), sensors(nmea, acc, temp));
         app.main();
     });
@@ -56,9 +52,7 @@ program
     .option('-a, --acc <acc>', 'File containing accelerometer recordings.')
     .option('-t, --temp <temp>', 'File containing temperature recordings.')
     .parse(process.argv);
-startSimulation(program).then(retval => {
-    console.log(`Simulator stopped with return value ${retval}.`);
-}).catch(error => {
+startSimulation(program).catch(error => {
     process.stderr.write(`${colors_1.red(error)}\n`);
 });
 //# sourceMappingURL=cli.js.map

@@ -8,5 +8,11 @@ const services = {
     gps: Gps_1.default,
     temp: Temp_1.default,
 };
-exports.createService = (name, sensor, sendMessage) => new (services[name])(sensor, sendMessage);
+exports.createService = (name, sensor, sendMessage) => {
+    const Service = services[name];
+    if (Service == null) {
+        throw new Error(`No service for a sensor named '${name}' is known.`);
+    }
+    return new Service(sensor, sendMessage);
+};
 //# sourceMappingURL=createService.js.map

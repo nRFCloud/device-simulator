@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { EventEmitter } from 'events';
 import { IHostConnection } from './HostConnection';
-import { ConfigurationData } from '../ConfigurationStorage';
+import { Configuration } from '../Configuration';
 import { ShadowModelReported } from '../ShadowModel';
 export declare class AWSIoTHostConnection extends EventEmitter implements IHostConnection {
     private config;
@@ -9,7 +9,7 @@ export declare class AWSIoTHostConnection extends EventEmitter implements IHostC
     private d2c?;
     private c2d?;
     private deltaEnabled;
-    constructor(config: ConfigurationData);
+    constructor(config: Configuration);
     private getShadowBaseTopic;
     updateShadow(reported: ShadowModelReported): Promise<void>;
     connect(): Promise<void>;
