@@ -1,9 +1,7 @@
-import * as os from 'os';
-import * as path from 'path';
 import * as program from 'commander';
 import { red } from 'colors';
 
-import { FileConfigurationStorage } from './ConfigurationStorage';
+import { readConfiguration } from './Configuration';
 import { PairingEngine } from './pairing/PairingEngine';
 import { DummyMethod } from './pairing/methods/DummyMethod';
 import { ISensor } from './sensors/Sensor';
@@ -33,11 +31,8 @@ const sensors = (nmea: string, acc: string, temp: string) => {
     return sensors;
 };
 
-const defaultConfig = path.join(os.homedir(), '.nrfcloud', 'simulator_config.json');
-
-async function startSimulation({config = defaultConfig, nmea, acc, temp}: program.Command) {
-    const configurationStorage = new FileConfigurationStorage(config);
-    const configuration = configurationStorage.getConfiguration();
+async function startSimulation({config, nmea, acc, temp}: program.Command) {
+    const configuration = readConfiguration(config);
 
     const app = new App(
         new PairingEngine(pairingMethods),

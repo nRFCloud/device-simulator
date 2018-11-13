@@ -1,18 +1,18 @@
 import { EventEmitter } from 'events';
 import { HostConnectionError, IHostConnection } from './HostConnection';
-import { ConfigurationData } from '../ConfigurationStorage';
+import { Configuration } from '../Configuration';
 import { ShadowModel, ShadowModelDesired, ShadowModelReported } from '../ShadowModel';
 
 import { device, DeviceOptions } from 'aws-iot-device-sdk';
 
 export class AWSIoTHostConnection extends EventEmitter implements IHostConnection {
-    private config: ConfigurationData;
+    private config: Configuration;
     private mqtt?: device;
     private d2c?: string;
     private c2d?: string;
     private deltaEnabled: boolean;
 
-    constructor(config: ConfigurationData) {
+    constructor(config: Configuration) {
         super();
 
         this.config = config;
