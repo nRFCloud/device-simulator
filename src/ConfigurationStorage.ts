@@ -1,13 +1,10 @@
 import * as fs from 'fs';
 
 export interface ConfigurationData {
-    platform: string;
-    version: string;
     caCert: string;
     clientCert: string;
     privateKey: string;
     clientId: string;
-    deviceType: string;
     brokerHostname: string;
     region: string;
 }
