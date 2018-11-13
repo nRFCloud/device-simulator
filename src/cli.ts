@@ -37,7 +37,7 @@ const defaultConfig = path.join(os.homedir(), '.nrfcloud', 'simulator_config.jso
 
 async function startSimulation({config = defaultConfig, nmea, acc, temp}: program.Command) {
     const configurationStorage = new FileConfigurationStorage(config);
-    const configuration = await configurationStorage.getConfiguration();
+    const configuration = configurationStorage.getConfiguration();
 
     const app = new App(
         new PairingEngine(pairingMethods),
