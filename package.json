@@ -5,14 +5,14 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "precompile": "npm run clean",
+    "precompile": "npm run clean && npm run schemas2ts",
     "clean": "rimraf dist/*",
     "build": "npm run lint && npm run compile",
     "compile": "npm run compile:ts",
     "compile:ts": "tsc",
     "lint": "tslint --project ./tsconfig.json",
     "test": "jest",
-    "schemas2ts": "./node_modules/json-schema-to-typescript/dist/src/cli.js schemas/app.schema.json src/app/AppModel.ts"
+    "schemas2ts": "json2ts schemas/app.schema.json src/app/AppModel.ts"
   },
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
     "jest": "^23.6.0",
     "json-schema-to-typescript": "^6.0.1",
     "pem": "^1.13.2",
+    "rimraf": "^2.6.2",
     "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
     "typescript": "^3.1.6"
