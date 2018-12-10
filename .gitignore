@@ -62,3 +62,4 @@ authentificationDocuments
 src/**/*.js
 __tests__/**/*.js
 .idea
+dist/**
