@@ -4,12 +4,11 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 
 export class FakeGps extends EventEmitter implements ISensor {
-    private readonly nmeaSeconds: any = {};
-    private currentNmeaSecond?: number;
+    private nmeaSentences: string[] = [];
+    private sentenceIndex: number = 0;
 
     private reader?: readline.ReadLine;
     private readStream?: fs.ReadStream;
-    private nmeaTick?: NodeJS.Timer;
 
     private started = false;
 
@@ -17,74 +16,31 @@ export class FakeGps extends EventEmitter implements ISensor {
         super();
     }
 
-    private setupNmeaReader() {
+    private readGPSData() {
         this.readStream = fs.createReadStream(this.nmeaRecording);
         this.reader = readline.createInterface({
             input: this.readStream
         });
 
         this.reader.on('line', line => {
-            if (line.split(',')[0] === '$GPGGA') {
-                // If we already have data pause readline
-                if (this.currentNmeaSecond) {
-                    this.reader!.pause();
-                }
-
-                this.currentNmeaSecond = Date.now();
-                this.nmeaSeconds[this.currentNmeaSecond] = [];
-            }
-
-            if (!this.currentNmeaSecond) {
-                return;
-            }
-
-            let addEntry = true;
-
-            if (this.sentenceFilter) {
-                addEntry = this.sentenceFilter.some((sentence: string) => {
-                    return line.startsWith(`\$${sentence}`);
-                });
-            }
-
-            if (addEntry) {
-                this.nmeaSeconds[this.currentNmeaSecond].push(line);
+            const matchesFilter = this.sentenceFilter.some((sentence: string) => {
+                return line.startsWith(`\$${sentence}`);
+            });
+            if (matchesFilter) {
+                this.nmeaSentences.push(line);
             }
         });
 
-        this.reader.on('close', () => {
-            this.cleanUp();
-        });
+        console.log('nmeaSentences', this.nmeaSentences);
 
         this.reader.on('end', () => {
             this.cleanUp();
         });
-
-        // TODO: setup error handling/file end
-        this.nmeaTick = setInterval(() => {
-            this.nextNmeaTick();
-        }, 1000);
     }
 
-    private nextNmeaTick() {
-        if (this.reader && this.readStream && this.readStream.isPaused()) {
-            this.reader.resume();
-        }
-
-        if (!this.nmeaSeconds) {
-            return;
-        }
-
-        const next = Object.keys(this.nmeaSeconds)[0];
-
-        if (next) {
-            const sentences = this.nmeaSeconds[next];
-
-            sentences.forEach((sentence: string) => {
-                this.emit('data', parseInt(next), new Uint8Array(Buffer.from(sentence)));
-            });
-
-            delete this.nmeaSeconds[next];
-        }
+    private emitGPSData() {
+        this.emit('data', Date.now(), new Uint8Array(Buffer.from(this.nmeaSentences[this.sentenceIndex])));
+        this.sentenceIndex++;
     }
 
     async start(): Promise<void> {
@@ -96,17 +52,16 @@ export class FakeGps extends EventEmitter implements ISensor {
 
         this.started = true;
 
-        this.setupNmeaReader();
+        this.readGPSData();
+
+        if (this.nmeaSentences) {
+            setInterval(() => {
+                this.emitGPSData();
+            }, 5000);
+        }
     }
 
     private cleanUp() {
-        this.emit('stopped');
-        this.started = false;
-
-        if (this.nmeaTick) {
-            clearInterval(this.nmeaTick);
-        }
-
         if (this.reader) {
             this.reader.close();
         }
@@ -117,7 +72,8 @@ export class FakeGps extends EventEmitter implements ISensor {
     }
 
     stop() {
-        this.cleanUp();
+        this.emit('stopped');
+        this.started = false;
     }
 
     isStarted(): boolean {
