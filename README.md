@@ -8,6 +8,12 @@ This utility cannot be run without installing at least the production dependenci
 
     npm ci --only=prod
 
+### Creating Devices and Certs
+
+Use `STAGE=dev STACK=dev node register-simulator.js` to create a new certificate.
+
+For more info see https://projecttools.nordicsemi.no/confluence/display/IRIS/nRF91+Simulator
+
 ### Device configuration
 To create a device configuration use [nrfcloud-cli](https://github.com/NordicPlayground/nrfcloud-cli).
  
