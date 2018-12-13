@@ -29,6 +29,8 @@ If you have curl installed:
     
     curl -L -o /tmp/output.txt "https://drive.google.com/uc?export=download&id=0BxDUQnmvFeMNOXM1ZmFFNHZZU2s"
 
+If you want to make your own GPS data, head over to https://nmeagen.org. The "Multi-point line" seems to work best. Lay some points and then click the "Generate NMEA file" button.    
+
 ### Accelerometer samples
 
 An accelerometer recording can be found here \_\_tests\_\_/sensors/accelerometer-recording.txt
