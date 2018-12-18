@@ -6,13 +6,12 @@ import * as readline from 'readline';
 export class FakeGps extends EventEmitter implements ISensor {
     private nmeaSentences: string[] = [];
     private sentenceIndex: number = 0;
-
     private reader?: readline.ReadLine;
     private readStream?: fs.ReadStream;
-
     private started = false;
+    private gpsEmitterIntervalId: any = null;
 
-    constructor(private readonly nmeaRecording: string, private readonly sentenceFilter: Array<string>) {
+    constructor(private readonly nmeaRecording: string, private readonly sentenceFilter: Array<string>, private readonly loop: boolean = false) {
         super();
     }
 
@@ -31,16 +30,25 @@ export class FakeGps extends EventEmitter implements ISensor {
             }
         });
 
-        console.log('nmeaSentences', this.nmeaSentences);
-
-        this.reader.on('end', () => {
-            this.cleanUp();
+        this.reader.on('close', () => {
+            this.cleanUpAndStartEmitting();
         });
     }
 
     private emitGPSData() {
         this.emit('data', Date.now(), new Uint8Array(Buffer.from(this.nmeaSentences[this.sentenceIndex])));
-        this.sentenceIndex++;
+
+        if (this.sentenceIndex === this.nmeaSentences.length - 1) {
+            if (this.loop) {
+                this.sentenceIndex = 0;
+            }
+            else {
+                this.stop();
+            }
+        }
+        else {
+            this.sentenceIndex++;
+        }
     }
 
     async start(): Promise<void> {
@@ -53,15 +61,9 @@ export class FakeGps extends EventEmitter implements ISensor {
         this.started = true;
 
         this.readGPSData();
-
-        if (this.nmeaSentences) {
-            setInterval(() => {
-                this.emitGPSData();
-            }, 5000);
-        }
     }
 
-    private cleanUp() {
+    private cleanUpAndStartEmitting() {
         if (this.reader) {
             this.reader.close();
         }
@@ -69,11 +71,18 @@ export class FakeGps extends EventEmitter implements ISensor {
         if (this.readStream) {
             this.readStream.close();
         }
+
+        if (this.nmeaSentences) {
+            this.gpsEmitterIntervalId = setInterval(() => {
+                this.emitGPSData();
+            }, 1000);
+        }
     }
 
     stop() {
-        this.emit('stopped');
+        clearInterval(this.gpsEmitterIntervalId);
         this.started = false;
+        this.emit('stopped');
     }
 
     isStarted(): boolean {

@@ -21,23 +21,23 @@ const pairingMethods = [
     new SwitchesMethod(4)
 ];
 
-const sensors = (nmea: string, acc: string, temp: string) => {
+const sensors = (nmea: string, acc: string, temp: string, loop: boolean) => {
     const sensors = new Map<string, ISensor>();
 
-    if (nmea) { sensors.set('gps', new FakeGps(nmea, ['GPGGA'])); }
+    if (nmea) { sensors.set('gps', new FakeGps(nmea, ['GPGGA'], loop)); }
     if (acc) { sensors.set('acc', new FakeAccelerometer(acc, true, 1000)); }
     if (temp) { sensors.set('temp', new FakeThermometer(temp, true, 7000)); }
 
     return sensors;
 };
 
-async function startSimulation({config, nmea, acc, temp}: program.Command) {
+async function startSimulation({config, nmea, acc, temp, loop}: program.Command) {
     const configuration = readConfiguration(config);
 
     const app = new App(
         new PairingEngine(pairingMethods),
         new AWSIoTHostConnection(configuration),
-        sensors(nmea, acc, temp));
+        sensors(nmea, acc, temp, loop));
     app.main();
 }
 
@@ -46,6 +46,7 @@ program
     .option('-n, --nmea <nmea>', 'File containing NMEA sentences.')
     .option('-a, --acc <acc>', 'File containing accelerometer recordings.')
     .option('-t, --temp <temp>', 'File containing temperature recordings.')
+    .option('-l, --loop <loop>', 'Continuously loop through the data.')
     .parse(process.argv);
 
 startSimulation(program).catch(error => {
