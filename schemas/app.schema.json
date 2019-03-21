@@ -13,7 +13,8 @@
             "enum": [
                 "GPS",
                 "FLIP",
-                "TEMP"
+                "TEMP",
+                "HUMID"
             ]
         },
         "messageType": {

@@ -2,6 +2,7 @@ import FakeThermometer from '../../src/sensors/FakeThermometer';
 import { FakeGps } from '../../src/sensors/FakeGps';
 import { ISensor } from '../../src/sensors/Sensor';
 import { FakeAccelerometer } from '../../src/sensors/FakeAccelerometer';
+import FakeHumidity from "../../src/sensors/FakeHumidity";
 
 const testFakeSensor = (sensorName: string, sensor: ISensor, expectedDataEvents: number) => {
     describe(sensorName, () => {
@@ -27,3 +28,6 @@ testFakeSensor('fake gps', new FakeGps(nmeaRecording, ['GPGGA', 'GPGLL']), 2);
 
 const accelerometerRecording = '__tests__/sensors/accelerometer-recording.txt';
 testFakeSensor('fake accelerometer', new FakeAccelerometer(accelerometerRecording, false, 10), 277);
+
+const humidityRecording = '__tests__/sensors/humidity-recording.txt';
+testFakeSensor('fake accelerometer', new FakeHumidity(humidityRecording, false, 10), 13);
