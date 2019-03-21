@@ -3,6 +3,7 @@ import { FakeGps } from '../../src/sensors/FakeGps';
 import { ISensor } from '../../src/sensors/Sensor';
 import { FakeAccelerometer } from '../../src/sensors/FakeAccelerometer';
 import FakeHumidity from "../../src/sensors/FakeHumidity";
+import FakePressure from "../../src/sensors/FakePressure";
 
 const testFakeSensor = (sensorName: string, sensor: ISensor, expectedDataEvents: number) => {
     describe(sensorName, () => {
@@ -31,3 +32,6 @@ testFakeSensor('fake accelerometer', new FakeAccelerometer(accelerometerRecordin
 
 const humidityRecording = '__tests__/sensors/humidity-recording.txt';
 testFakeSensor('fake accelerometer', new FakeHumidity(humidityRecording, false, 10), 13);
+
+const pressureRecording = '__tests__/sensors/humidity-recording.txt';
+testFakeSensor('fake accelerometer', new FakePressure(pressureRecording, false, 10), 13);

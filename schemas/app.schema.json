@@ -14,7 +14,8 @@
                 "GPS",
                 "FLIP",
                 "TEMP",
-                "HUMID"
+                "HUMID",
+                "AIR_PRESS"
             ]
         },
         "messageType": {

@@ -5,6 +5,7 @@ import Gps from "./Gps";
 import Temp from "./Temp";
 import Flip from "./Flip";
 import Humidity from "./Humidity";
+import Pressure from "./Pressure";
 
 interface ServiceConstructors {
     [index: string]: new (sensor: ISensor, sendMessage: SendMessage) => Service;
@@ -15,6 +16,7 @@ const services: ServiceConstructors = {
     gps: Gps,
     temp: Temp,
     humid: Humidity,
+    press: Pressure,
 };
 
 export const createService = (name: string, sensor: ISensor, sendMessage: SendMessage) => {

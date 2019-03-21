@@ -11,6 +11,7 @@ import { SwitchesMethod } from './pairing/methods/ButtonsMethod';
 import { FakeAccelerometer } from './sensors/FakeAccelerometer';
 import FakeThermometer from './sensors/FakeThermometer';
 import FakeHumidity from "./sensors/FakeHumidity";
+import FakePressure from "./sensors/FakePressure";
 import App from './app/App';
 
 process.on('unhandledRejection', function (reason, p) {
@@ -22,24 +23,25 @@ const pairingMethods = [
     new SwitchesMethod(4)
 ];
 
-const sensors = (nmea: string, acc: string, temp: string, humid: string) => {
+const sensors = (nmea: string, acc: string, temp: string, humid: string, press: string) => {
     const sensors = new Map<string, ISensor>();
 
     if (nmea) { sensors.set('gps', new FakeGps(nmea, ['GPGGA'])); }
     if (acc) { sensors.set('acc', new FakeAccelerometer(acc, true, 1000)); }
     if (temp) { sensors.set('temp', new FakeThermometer(temp, true, 7000)); }
     if (humid) { sensors.set('humid', new FakeHumidity(humid, true, 6000)); }
+    if (press) { sensors.set('press', new FakePressure(press, true, 5000)); }
     console.log('Expecting sensors', sensors);
     return sensors;
 };
 
-async function startSimulation({config, nmea, acc, temp, humid}: program.Command) {
+async function startSimulation({config, nmea, acc, temp, humid, press}: program.Command) {
     const configuration = readConfiguration(config);
 
     const app = new App(
         new PairingEngine(pairingMethods),
         new AWSIoTHostConnection(configuration),
-        sensors(nmea, acc, temp, humid));
+        sensors(nmea, acc, temp, humid, press));
     app.main();
 }
 
@@ -49,6 +51,7 @@ program
     .option('-a, --acc <acc>', 'File containing accelerometer recordings.')
     .option('-t, --temp <temp>', 'File containing temperature recordings.')
     .option('-h, --humid <humid>', 'File containing humidity recordings.')
+    .option('-p, --press <press>', 'File containing pressure recordings.')
     .parse(process.argv);
 
 startSimulation(program).catch(error => {

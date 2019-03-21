@@ -7,7 +7,7 @@
  * Message format for simulator app
  */
 export interface AppMessage {
-    appId: "GPS" | "FLIP" | "TEMP" | "HUMID";
+    appId: "GPS" | "FLIP" | "TEMP" | "HUMID" | "AIR_PRESS";
     messageType: "HELLO" | "START" | "STOP" | "INT" | "GET" | "STATUS" | "DATA" | "OK" | "EVENT";
     /**
      * This number is incremented by one for each message transmitted

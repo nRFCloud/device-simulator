@@ -19,6 +19,7 @@ const ButtonsMethod_1 = require("./pairing/methods/ButtonsMethod");
 const FakeAccelerometer_1 = require("./sensors/FakeAccelerometer");
 const FakeThermometer_1 = require("./sensors/FakeThermometer");
 const FakeHumidity_1 = require("./sensors/FakeHumidity");
+const FakePressure_1 = require("./sensors/FakePressure");
 const App_1 = require("./app/App");
 process.on('unhandledRejection', function (reason, p) {
     console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
@@ -27,7 +28,7 @@ const pairingMethods = [
     new DummyMethod_1.DummyMethod([1, 2, 3, 4, 5, 6]),
     new ButtonsMethod_1.SwitchesMethod(4)
 ];
-const sensors = (nmea, acc, temp, humid) => {
+const sensors = (nmea, acc, temp, humid, press) => {
     const sensors = new Map();
     if (nmea) {
         sensors.set('gps', new FakeGps_1.FakeGps(nmea, ['GPGGA']));
@@ -41,13 +42,16 @@ const sensors = (nmea, acc, temp, humid) => {
     if (humid) {
         sensors.set('humid', new FakeHumidity_1.default(humid, true, 6000));
     }
+    if (press) {
+        sensors.set('press', new FakePressure_1.default(press, true, 5000));
+    }
     console.log('Expecting sensors', sensors);
     return sensors;
 };
-function startSimulation({ config, nmea, acc, temp, humid }) {
+function startSimulation({ config, nmea, acc, temp, humid, press }) {
     return __awaiter(this, void 0, void 0, function* () {
         const configuration = Configuration_1.readConfiguration(config);
-        const app = new App_1.default(new PairingEngine_1.PairingEngine(pairingMethods), new AWSIoTHostConnection_1.AWSIoTHostConnection(configuration), sensors(nmea, acc, temp, humid));
+        const app = new App_1.default(new PairingEngine_1.PairingEngine(pairingMethods), new AWSIoTHostConnection_1.AWSIoTHostConnection(configuration), sensors(nmea, acc, temp, humid, press));
         app.main();
     });
 }
@@ -57,6 +61,7 @@ program
     .option('-a, --acc <acc>', 'File containing accelerometer recordings.')
     .option('-t, --temp <temp>', 'File containing temperature recordings.')
     .option('-h, --humid <humid>', 'File containing humidity recordings.')
+    .option('-p, --press <press>', 'File containing pressure recordings.')
     .parse(process.argv);
 startSimulation(program).catch(error => {
     process.stderr.write(`${colors_1.red(error)}\n`);
