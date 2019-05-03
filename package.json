@@ -35,7 +35,7 @@
     "@nrfcloud/tslint-config": "^3.8.0",
     "@types/aws-iot-device-sdk": "^2.1.1",
     "@types/jest": "^24.0.11",
-    "@types/node": "^11.11.4",
+    "@types/node": "^12.0.0",
     "husky": "^2.0.0",
     "jest": "^24.5.0",
     "json-schema-to-typescript": "^6.0.1",
